@@ -100,6 +100,12 @@
     <Compile Include="EntryCard.Designer.cs">
       <DependentUpon>EntryCard.cs</DependentUpon>
     </Compile>
+    <Compile Include="PreFilterCard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PreFilterCard.Designer.cs">
+      <DependentUpon>PreFilterCard.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FRMVanishingAlert.resx">
@@ -114,6 +120,10 @@
       <SubType>Designer</SubType>
       <DependentUpon>EntryCard.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="PreFilterCard.resx">
+      <DependentUpon>PreFilterCard.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -124,6 +134,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="App.config" />
     <None Include="DSLogData.xsc">
       <DependentUpon>DSLogData.xsd</DependentUpon>
     </None>

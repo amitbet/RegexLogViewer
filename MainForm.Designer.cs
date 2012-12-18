@@ -429,7 +429,7 @@ namespace LogViewer
             this.exportToSsvFileToolStripMenuItem.Name = "exportToSsvFileToolStripMenuItem";
             this.exportToSsvFileToolStripMenuItem.Size = new System.Drawing.Size(271, 24);
             this.exportToSsvFileToolStripMenuItem.Text = "Export to csv File";
-            this.exportToSsvFileToolStripMenuItem.Click += new System.EventHandler(this.exportToSsvFileToolStripMenuItem_Click);
+            this.exportToSsvFileToolStripMenuItem.Click += new System.EventHandler(this.exportToCsvFileToolStripMenuItem_Click);
             // 
             // generateCsvReportToolStripMenuItem
             // 

@@ -12,6 +12,7 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
+using System.Globalization;
 
 namespace LogViewer
 {
@@ -512,128 +513,128 @@ namespace LogViewer
         /// <param name="p_strLogFileName"></param>
         /// <param name="p_intStartPos"></param>
         /// <returns></returns>
-        public long ParseLogFile(string p_strLogFileName, long p_intStartPos)
-        {
-            m_dtlogEntries.BeginLoadData();
-            long lngEndReadPos = 0;
-            try
-            {
-                using (FileStream objFStream = new FileStream(p_strLogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    objFStream.Position = p_intStartPos;
-                    using (StreamReader objReader = new StreamReader(objFStream, Encoding.GetEncoding("windows-1255")))
-                    {
-                        string strLine = objReader.ReadLine();
+        //public long ParseLogFile(string p_strLogFileName, long p_intStartPos)
+        //{
+        //    m_dtlogEntries.BeginLoadData();
+        //    long lngEndReadPos = 0;
+        //    try
+        //    {
+        //        using (FileStream objFStream = new FileStream(p_strLogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        //        {
+        //            objFStream.Position = p_intStartPos;
+        //            using (StreamReader objReader = new StreamReader(objFStream, Encoding.GetEncoding("windows-1255")))
+        //            {
+        //                string strLine = objReader.ReadLine();
 
-                        DSLogData.LogEntriesRow drRow = m_objDummyTable.NewLogEntriesRow();
-                        m_drPrevRow = drRow;
-                        //if (strLine != null && strLine.Contains("SPC"))
-                        //{ }
+        //                DSLogData.LogEntriesRow drRow = m_objDummyTable.NewLogEntriesRow();
+        //                m_drPrevRow = drRow;
+        //                //if (strLine != null && strLine.Contains("SPC"))
+        //                //{ }
 
-                        while (strLine != null)
-                        {
+        //                while (strLine != null)
+        //                {
 
-                            //m_drPrevRow = drRow;
-                            //if (IsLineInFilter(p_strLogFileName, strLine))
-                            drRow = ParseLogLine(strLine, ref m_drPrevRow);
-                            if (drRow != null)
-                            {
-                                if (IsLineInFilter(p_strLogFileName, m_drPrevRow) && !m_drPrevRow.IsKeyNull())
-                                {
-                                    //DSLogData.LogEntriesRow newRow = m_dtlogEntries.NewLogEntriesRow();
-                                    //newRow.ItemArray = m_drPrevRow.ItemArray;
-                                    //m_dtlogEntries.AddLogEntriesRow(newRow);
-                                    ImportRowToTable(m_drPrevRow, m_dtlogEntries);
-                                    //m_drPrevRow.Delete();
-                                }
-                                m_drPrevRow = drRow;
-                            }
-                            //else
-                            //drRow = null;
-                            while (drRow == null)
-                            {
-                                strLine = objReader.ReadLine();
-                                //if (strLine != null && strLine.Contains("SPC"))
-                                //{ }
+        //                    //m_drPrevRow = drRow;
+        //                    //if (IsLineInFilter(p_strLogFileName, strLine))
+        //                    drRow = ParseLogLine(strLine, ref m_drPrevRow);
+        //                    if (drRow != null)
+        //                    {
+        //                        if (IsLineInFilter(p_strLogFileName, m_drPrevRow) && !m_drPrevRow.IsKeyNull())
+        //                        {
+        //                            //DSLogData.LogEntriesRow newRow = m_dtlogEntries.NewLogEntriesRow();
+        //                            //newRow.ItemArray = m_drPrevRow.ItemArray;
+        //                            //m_dtlogEntries.AddLogEntriesRow(newRow);
+        //                            ImportRowToTable(m_drPrevRow, m_dtlogEntries);
+        //                            //m_drPrevRow.Delete();
+        //                        }
+        //                        m_drPrevRow = drRow;
+        //                    }
+        //                    //else
+        //                    //drRow = null;
+        //                    while (drRow == null)
+        //                    {
+        //                        strLine = objReader.ReadLine();
+        //                        //if (strLine != null && strLine.Contains("SPC"))
+        //                        //{ }
 
 
-                                if (strLine == null)
-                                {
+        //                        if (strLine == null)
+        //                        {
 
-                                    return (objFStream.Position);
-                                }
+        //                            return (objFStream.Position);
+        //                        }
 
-                                drRow = ParseLogLine(strLine, ref m_drPrevRow);
-                                if (drRow != null)
-                                {
-                                    if (IsLineInFilter(p_strLogFileName, m_drPrevRow) && !m_drPrevRow.IsKeyNull())
-                                    {
-                                        //m_drPrevRow.Delete();
-                                        ImportRowToTable(m_drPrevRow, m_dtlogEntries);
-                                    }
-                                    m_drPrevRow = drRow;
-                                }
-                                //else
-                                //continue;
-                            }
+        //                        drRow = ParseLogLine(strLine, ref m_drPrevRow);
+        //                        if (drRow != null)
+        //                        {
+        //                            if (IsLineInFilter(p_strLogFileName, m_drPrevRow) && !m_drPrevRow.IsKeyNull())
+        //                            {
+        //                                //m_drPrevRow.Delete();
+        //                                ImportRowToTable(m_drPrevRow, m_dtlogEntries);
+        //                            }
+        //                            m_drPrevRow = drRow;
+        //                        }
+        //                        //else
+        //                        //continue;
+        //                    }
 
-                            if (drRow.ThreadName != null && drRow.ThreadName != "")
-                            {
-                                ++m_intLineCount;
-                                drRow.SourceLogFile = Path.GetFileName(p_strLogFileName);
-                                if (p_strLogFileName.StartsWith("\\\\"))
-                                {
-                                    drRow.ServerName = p_strLogFileName.Substring(2, p_strLogFileName.IndexOf('\\', 3) - 2);
-                                }
-                                else
-                                    drRow.ServerName = "localhost";
+        //                    if (drRow.ThreadName != null && drRow.ThreadName != "")
+        //                    {
+        //                        ++m_intLineCount;
+        //                        drRow.SourceLogFile = Path.GetFileName(p_strLogFileName);
+        //                        if (p_strLogFileName.StartsWith("\\\\"))
+        //                        {
+        //                            drRow.ServerName = p_strLogFileName.Substring(2, p_strLogFileName.IndexOf('\\', 3) - 2);
+        //                        }
+        //                        else
+        //                            drRow.ServerName = "localhost";
 
-                                //if (IsLineInFilter(p_strLogFileName, drRow.Info + " " + drRow.RowError))
-                                //m_dtlogEntries.AddLogEntriesRow(drRow);
-                            }
-                            //read next line
-                            strLine = objReader.ReadLine();
-                            //if (strLine != null && strLine.Contains("SPC"))
-                            //{ }
+        //                        //if (IsLineInFilter(p_strLogFileName, drRow.Info + " " + drRow.RowError))
+        //                        //m_dtlogEntries.AddLogEntriesRow(drRow);
+        //                    }
+        //                    //read next line
+        //                    strLine = objReader.ReadLine();
+        //                    //if (strLine != null && strLine.Contains("SPC"))
+        //                    //{ }
 
-                        }
+        //                }
 
-                        //check the last line
-                        if (drRow != null)
-                        {
-                            if (IsLineInFilter(p_strLogFileName, drRow) && !m_drPrevRow.IsKeyNull())
-                            {
-                                ImportRowToTable(drRow, m_dtlogEntries);
-                                //m_dtlogEntries.ImportRow(drRow);
-                                //drRow.Delete();
-                            }
-                        }
+        //                //check the last line
+        //                if (drRow != null)
+        //                {
+        //                    if (IsLineInFilter(p_strLogFileName, drRow) && !m_drPrevRow.IsKeyNull())
+        //                    {
+        //                        ImportRowToTable(drRow, m_dtlogEntries);
+        //                        //m_dtlogEntries.ImportRow(drRow);
+        //                        //drRow.Delete();
+        //                    }
+        //                }
 
-                        lngEndReadPos = objFStream.Position;
-                    }
-                }
-            }
-            catch
-            {
-                //only open a file in notepad if it's a new file causing the problem...
-                if (p_intStartPos == 0)
-                {
-                    FRMVanishingAlert.ShowForm(2, "Wrong Log Format", "Not a Tira log,\r\n\rOpening Notepad", "", "", 0, 0, true, FormStartPosition.Manual, false);
+        //                lngEndReadPos = objFStream.Position;
+        //            }
+        //        }
+        //    }
+        //    catch
+        //    {
+        //        //only open a file in notepad if it's a new file causing the problem...
+        //        if (p_intStartPos == 0)
+        //        {
+        //            FRMVanishingAlert.ShowForm(2, "Wrong Log Format", "Not a Tira log,\r\n\rOpening Notepad", "", "", 0, 0, true, FormStartPosition.Manual, false);
 
-                    string strWinDir = Environment.GetEnvironmentVariable("SystemRoot");
-                    Process.Start(strWinDir + "\\notepad.exe", p_strLogFileName);
-                    //this.Visible = false;
-                }
-                return long.MinValue;
-            }
-            finally
-            {
-                m_dtlogEntries.EndLoadData();
-                CreateDummyTable();
-            }
+        //            string strWinDir = Environment.GetEnvironmentVariable("SystemRoot");
+        //            Process.Start(strWinDir + "\\notepad.exe", p_strLogFileName);
+        //            //this.Visible = false;
+        //        }
+        //        return long.MinValue;
+        //    }
+        //    finally
+        //    {
+        //        m_dtlogEntries.EndLoadData();
+        //        CreateDummyTable();
+        //    }
 
-            return lngEndReadPos;
-        }
+        //    return lngEndReadPos;
+        //}
 
         /// <summary>
         /// discovers the correct parser to use for this log file
@@ -697,7 +698,7 @@ namespace LogViewer
                 using (FileStream objFStream = new FileStream(p_strLogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     objFStream.Position = p_intStartPos;
-                    using (StreamReader objReader = new StreamReader(objFStream, Encoding.GetEncoding("windows-1255")))
+                    using (StreamReader objReader = new StreamReader(objFStream, CurrentEncoding))
                     {
 
                         string strAllText = objReader.ReadToEnd();
@@ -1465,7 +1466,7 @@ namespace LogViewer
             m_objChosenBehavior = null;
         }
 
-        private void exportToSsvFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private void exportToCsvFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //ask user for a filename
             saveFileDialog1.AddExtension = true;
@@ -1479,13 +1480,42 @@ namespace LogViewer
             ExportToCsvFile(csvFileName);
 
         }
+        
+        Encoding m_objEncoding = Encoding.ASCII;
+        Encoding CurrentEncoding
+        {
+            get
+            {
+                if (m_objEncoding != Encoding.ASCII)
+                    return m_objEncoding;
+
+                string encName = System.Configuration.ConfigurationSettings.AppSettings["Encoding"];
+                try
+                {
+                    if (!string.IsNullOrEmpty(encName))
+                    {
+                        m_objEncoding = Encoding.GetEncoding(encName.Trim());
+                        return m_objEncoding;
+                    }
+                }
+                catch{ }
+            
+                CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
+                int codePage = cultureInfo.TextInfo.ANSICodePage;
+                m_objEncoding = codePage.Equals(0) ?
+                                        Encoding.UTF8 :
+                                        Encoding.GetEncoding(codePage);
+                return m_objEncoding;
+            }
+        }
 
         private void ExportToCsvFile(string csvFileName)
         {
+        
             try
             {
                 //export
-                using (StreamWriter wr = new StreamWriter(File.OpenWrite(csvFileName), Encoding.GetEncoding("windows-1255")))
+                using (StreamWriter wr = new StreamWriter(File.OpenWrite(csvFileName), CurrentEncoding))
                 {
                     //export headings
                     foreach (DataGridViewColumn col in dataGridView1.Columns)
@@ -1526,7 +1556,7 @@ namespace LogViewer
             try
             {
                 //export
-                using (StreamWriter wr = new StreamWriter(File.OpenWrite(csvFileName), Encoding.GetEncoding("windows-1255")))
+                using (StreamWriter wr = new StreamWriter(File.OpenWrite(csvFileName), CurrentEncoding))
                 {
                     //export headings
                     foreach (DataColumn col in table.Columns)

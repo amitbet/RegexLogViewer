@@ -37,4 +37,18 @@
     <ParserRegexOptionsString>ignoreCase,Multiline Compiled Singleline</ParserRegexOptionsString>
     <BehaviorName>STDesigner</BehaviorName>
   </LogBehavior>
+  <LogBehavior>
+  <BehaviorName>LogViewer</BehaviorName>
+  <Grade>0</Grade>
+    <GridCols>
+      <string>date</string>
+      <string>thread</string>
+      <string>level</string>
+      <string>info</string>
+      <string>exinfo</string>
+    </GridCols>
+    <DateFormat>yyyy-MM-dd HH:mm:ss,fff</DateFormat>
+    <ParserRegexPatternCData><![CDATA[(?<date>\d{2}/\d{2} \d{2}:\d{2}:\d{2},\d{3})\s[\w.\s]*\[\s*(?<thread>[\w\d]*)\]\s*(?<level>\w{4,8})\s{1,5}[-\s]*\|\|(?<info>.*?)\n(?<exinfo>.*?)(?=\d{2}/\d{2}|\z)]]></ParserRegexPatternCData>
+    <ParserRegexOptionsString>ignoreCase,Multiline Compiled Singleline</ParserRegexOptionsString>
+  </LogBehavior>
 </ArrayOfLogBehavior>
