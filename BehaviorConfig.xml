@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<ArrayOfLogBehavior xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <LogBehavior xsi:type="DefaultLogBehavior">
+    <Grade>0</Grade>
+    <GridCols>
+      <string>info</string>
+    </GridCols>
+    <DateFormat>yyyy-MM-dd HH:mm:ss,fff</DateFormat>
+    <ParserRegexPatternCData><![CDATA[(?<info>.*)
+]]></ParserRegexPatternCData>
+    <ParserRegexOptionsString>Multiline Compiled</ParserRegexOptionsString>
+    <BehaviorName>Default</BehaviorName>
+  </LogBehavior>
+  <LogBehavior>
+    <Grade>0</Grade>
+    <GridCols>
+      <string>exinfo</string>
+      <string>level</string>
+      <string>info</string>
+    </GridCols>
+    <DateFormat>dd/MM HH:mm:ss,fff</DateFormat>
+    <ParserRegexPatternCData><![CDATA[(?:(?<exinfo>(?<file>[\w\d\s\.]*)\((?<line>\d{1,5}),(?<column>\d{1,5})\)):\s(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])|(?:(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])]]></ParserRegexPatternCData>
+    <ParserRegexOptionsString>IgnoreCase Compiled</ParserRegexOptionsString>
+    <BehaviorName>VisualStudio</BehaviorName>
+  </LogBehavior>
+  <LogBehavior>
+    <Grade>0</Grade>
+    <GridCols>
+      <string>date</string>
+      <string>thread</string>
+      <string>level</string>
+      <string>info</string>
+      <string>exinfo</string>
+    </GridCols>
+    <DateFormat>yyyy-MM-dd HH:mm:ss,fff</DateFormat>
+    <ParserRegexPatternCData><![CDATA[^(?<date>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2},\d{3})\s[\w.\s]*\[\s*(?<thread>[\w\d]*)\]\s*(?<level>\w*)\s*[-\s]*(?<info>.*?)\n(?<exinfo>.*?)(?=\d{4}-\d{2}|\z)]]></ParserRegexPatternCData>
+    <ParserRegexOptionsString>ignoreCase,Multiline Compiled Singleline</ParserRegexOptionsString>
+    <BehaviorName>STDesigner</BehaviorName>
+  </LogBehavior>
+</ArrayOfLogBehavior>
