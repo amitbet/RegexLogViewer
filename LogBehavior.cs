@@ -14,7 +14,7 @@ namespace LogViewer
     public class LogBehavior
     {
         Dictionary<string, LogGridColDefinition> m_colDefaultColumns = new Dictionary<string, LogGridColDefinition>();
-        
+
         public LogBehavior()
         {
             m_colDefaultColumns.Add("key", new LogGridColDefinition { Header = "No.", Name = "EntryNumber", LogViewerDataMemberName = LogViwerDataFieldName.Key });
@@ -37,11 +37,13 @@ namespace LogViewer
         HashSet<string> m_colGridCols = new HashSet<string>();
         public HashSet<string> GridCols
         {
-            get { 
-                return m_colGridCols; 
+            get
+            {
+                return m_colGridCols;
             }
-            set {
-                m_colGridCols = value; 
+            set
+            {
+                m_colGridCols = value;
             }
         }
 
@@ -60,7 +62,8 @@ namespace LogViewer
         public Regex ParserRegex
         {
             get { return m_regParser; }
-            set {
+            set
+            {
                 m_regParserPattern = value.ToString();
                 m_enmParserOptions = value.Options;
                 //FillRegexFlagsString(value.Options);
@@ -84,7 +87,7 @@ namespace LogViewer
                 FillColumnsFromRegexPattern(value);
             }
         }
-        
+
         Regex m_regGroupFinder = new Regex(@"\(\?\<(?<groupname>\w*)\>", RegexOptions.Compiled);
         private void FillColumnsFromRegexPattern(string strPattern)
         {
@@ -97,16 +100,16 @@ namespace LogViewer
                 if (m_colDefaultColumns.ContainsKey(strGroup))
                     groups.Add(strGroup);
             }
-            
+
             GridCols = groups;
         }
-        
+
 
         /// <summary>
         /// this is used only for serialization
         /// </summary>
-        [XmlElement("ParserRegexPatterCData")]
-        public XmlCDataSection ParserRegexPatterCData
+        [XmlElement("ParserRegexPatternCData")]
+        public XmlCDataSection ParserRegexPatternCData
         {
             get
             {
@@ -121,38 +124,73 @@ namespace LogViewer
         }
 
         RegexOptions m_enmParserOptions = RegexOptions.None;
+        [XmlIgnore]
         public RegexOptions ParserRegexOptions
         {
             get { return m_enmParserOptions; }
-            set {
+            set
+            {
 
                 m_enmParserOptions = value;
-                m_regParser = new Regex(m_regParserPattern, m_enmParserOptions);
-               
+                if (m_regParserPattern != null)
+                    m_regParser = new Regex(m_regParserPattern, m_enmParserOptions);
+
             }
         }
 
-      
+        /// <summary>
+        /// used to parse xml config data, allowing a better user experiance (such as ,; upper/lower case)
+        /// </summary>
+        public String ParserRegexOptionsString
+        {
+            get { return ParserRegexOptions.ToString(); }
+            set
+            {
+                ParserRegexOptions = RegexOptions.None;
+                string[] parts = value.Split(" ,;".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                string[] names = Enum.GetNames(typeof(RegexOptions));
+                Dictionary<string, RegexOptions> namesToOptions = new Dictionary<string, RegexOptions>();
+                foreach (string name in names)
+                {
+                    namesToOptions.Add(name.ToLower(), (RegexOptions)Enum.Parse(typeof(RegexOptions), name));
+                }
+                foreach (string part in parts)
+                {
+                    string lowpart = part.ToLower();
+                    if (namesToOptions.ContainsKey(lowpart))
+                    {
+                        ParserRegexOptions |= namesToOptions[lowpart];
+                    }
+                }
+            }
+        }
+
+
         Action<DataGridView> m_actCreateGridCols = null;
         [XmlIgnore]
         public Action<DataGridView> CreateGridCols
         {
-            get {
+            get
+            {
                 if (m_actCreateGridCols == null)
                 {
                     m_actCreateGridCols = GetCreationActionFromGridCols();
                 }
-                return m_actCreateGridCols; 
-                
+                return m_actCreateGridCols;
+
             }
             set { m_actCreateGridCols = value; }
         }
 
+        /// <summary>
+        /// choose column creation actions from the list of known columns, by using the list of chosen columns in the configuration
+        /// </summary>
+        /// <returns></returns>
         private Action<DataGridView> GetCreationActionFromGridCols()
         {
             List<LogGridColDefinition> colColumnDefinitions = new List<LogGridColDefinition>();
             colColumnDefinitions.Add(m_colDefaultColumns["key"]);
-            
+
             //find matches
             foreach (string group in GridCols)
             {
@@ -169,7 +207,7 @@ namespace LogViewer
 
         public static Action<DataGridView> CreateGridColumnActionFromColDefenitionList(List<LogGridColDefinition> p_colColDefs)
         {
-            
+
             Action<DataGridView> CreateGridCols = (dataGridView) =>
             {
                 foreach (LogGridColDefinition def in p_colColDefs)
