@@ -20,11 +20,8 @@ namespace LogViewer
 
     public partial class MainForm : Form
     {
-        //Regex m_regParsingReg = new Regex(@"^(?<date>\d{2}/\d{2} \d{2}:\d{2}:\d{2},\d{3})\s*\[(?<thread>[\w\d]*)\]\s*(?<level>\w*)\s*\|\|\s*(?<user>\w*)\s*\|\|\s*(?<computer>.*?)\|\|(?<info>.*?)\|\|(?<exinfo>.*?)(?=\d{2}/\d{2}|\z)", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
-        //Regex m_regParsingReg = new Regex(@"(?:(?<exinfo>(?<file>.*)\((?<line>\d{1,5}),(?<column>\d{1,5})\)):\s(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])|(?:(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         List<LogBehavior> m_colBehaviors = new List<LogBehavior>();
-        Regex m_regParsingReg1 = new Regex(@"(?:(?<exinfo>(?<file>[\w\d\s\.]*)\((?<line>\d{1,5}),(?<column>\d{1,5})\)):\s(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])|(?:(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        Regex m_regParsingReg2 = new Regex(@"^(?<date>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2},\d{3})\s[\w.\s]*\[\s*(?<thread>[\w\d]*)\]\s*(?<level>\w*)\s*[-\s]*(?<info>.*?)\n(?<exinfo>.*?)(?=\d{4}-\d{2}|\z)", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled);
+        Regex m_regVSParsingReg = new Regex(@"(?:(?<exinfo>(?<file>[\w\d\s\.]*)\((?<line>\d{1,5}),(?<column>\d{1,5})\)):\s(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])|(?:(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         LogBehavior m_objChosenBehavior = null;
         public static string DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss,fff";
 
@@ -32,7 +29,7 @@ namespace LogViewer
         private DSLogData.LogEntriesDataTable m_dtlogEntries;
         private EntryCard m_frmCard = new EntryCard();
         private DataViewEx m_dvMainView = null;
-        private DSLogData.LogEntriesRow m_drPrevRow;
+
         private int m_intLineCount = 0;
         private Regex regMaskStringToNumber = new Regex("[0-9]+", RegexOptions.Compiled);
 
@@ -56,23 +53,11 @@ namespace LogViewer
             else
             {
                 m_colBehaviors.Add(new DefaultLogBehavior());
-                //CreateGridCols = CreateGridColumnActionFromColDefenitionList(new List<LogGridColDefinition>(){
-
-                //m_colBehaviors.Add(new DefaultLogBehavior("Default", m_regParsingReg1, "dd/MM HH:mm:ss,fff")
-                //{
-                //    CreateGridCols = LogBehavior.CreateGridColumnActionFromColDefenitionList(
-                //         new List<LogGridColDefinition>() { 
-                //                new LogGridColDefinition{ LogViewerDataMemberName = LogViwerDataFieldName.Info, Name= "Info", Header="Info"},
-                //                new LogGridColDefinition{ LogViewerDataMemberName = LogViwerDataFieldName.Key, Name= "Key", Header="Key"},
-                //                new LogGridColDefinition{ LogViewerDataMemberName = LogViwerDataFieldName.SourceLogFile, Name= "SourceLogFile", Header="SourceLogFile"}
-                //        }
-                //        )}
-                //    );
 
                 m_colBehaviors.Add(new LogBehavior()
                 {
                     BehaviorName = "VisualStudio",
-                    ParserRegex = m_regParsingReg1,
+                    ParserRegex = m_regVSParsingReg,
                     DateFormat = "dd/MM HH:mm:ss,fff",
                     CreateGridCols = LogBehavior.CreateGridColumnActionFromColDefenitionList(
                          new List<LogGridColDefinition>() { 
@@ -83,171 +68,10 @@ namespace LogViewer
                             new LogGridColDefinition { Header = "SourceLogFile", Name = "SourceLogFile", LogViewerDataMemberName= LogViwerDataFieldName.SourceLogFile }
                         })
                 });
-
-
-
-
-                m_colBehaviors.Add(new LogBehavior()
-                     {
-                         BehaviorName = "STDesigner",
-                         ParserRegex = m_regParsingReg2,
-                         DateFormat = "yyyy-MM-dd HH:mm:ss,fff",
-                         CreateGridCols = LogBehavior.CreateGridColumnActionFromColDefenitionList(
-                         new List<LogGridColDefinition>() { 
-                        new LogGridColDefinition { Header = "EntryTime", Name = "EntryTime", LogViewerDataMemberName= LogViwerDataFieldName.EntryTime },
-                        new LogGridColDefinition { Header = "ThreadName", Name = "ThreadName", LogViewerDataMemberName= LogViwerDataFieldName.ThreadName },
-                        new LogGridColDefinition { Header = "Level", Name = "Level", LogViewerDataMemberName= LogViwerDataFieldName.LogLevel },
-                        new LogGridColDefinition { Header = "Info", Name = "Info", LogViewerDataMemberName= LogViwerDataFieldName.Info },
-                        new LogGridColDefinition { Header = "ExInfo", Name = "ExInfo", LogViewerDataMemberName= LogViwerDataFieldName.ErrorInfo },
-                        new LogGridColDefinition { Header = "No.", Name = "EntryNumber", LogViewerDataMemberName= LogViwerDataFieldName.Key },
-                        new LogGridColDefinition { Header = "SourceLogFile", Name = "SourceLogFile", LogViewerDataMemberName= LogViwerDataFieldName.SourceLogFile },
-                    })
-                     });
-
             }
-            //m_colBehaviors.Add(new LogBehavior
-            //{
-            //    BehaviorName = "VisualStudio",
-            //    ParserRegex = m_regParsingReg1,
-            //    DateFormat = "dd/MM HH:mm:ss,fff",
-            //    CreateGridCols = (dataGridView) =>
-            //    {
-            //        dataGridView.Columns.Clear();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn EntryNumber = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn Level = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn Info = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn ExInfo = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn SourceLogFile = new DataGridViewTextBoxColumn();
-
-
-            //        // 
-            //        // EntryNumber
-            //        // 
-            //        EntryNumber.DataPropertyName = "Key";
-            //        EntryNumber.HeaderText = "No.";
-            //        EntryNumber.Name = "EntryNumber";
-            //        EntryNumber.ReadOnly = true;
-            //        // 
-            //        // Level
-            //        // 
-            //        Level.DataPropertyName = "LogLevel";
-            //        Level.HeaderText = "Level";
-            //        Level.Name = "Level";
-            //        Level.ReadOnly = true;
-            //        // 
-            //        // Info
-            //        // 
-            //        Info.DataPropertyName = "Info";
-            //        Info.HeaderText = "Info";
-            //        Info.Name = "Info";
-            //        Info.ReadOnly = true;
-            //        // 
-            //        // ExInfo
-            //        // 
-            //        ExInfo.DataPropertyName = "ErrorInfo";
-            //        ExInfo.HeaderText = "ExInfo";
-            //        ExInfo.Name = "ExInfo";
-            //        ExInfo.ReadOnly = true;
-
-            //        // 
-            //        // SourceLogFile
-            //        // 
-            //        SourceLogFile.DataPropertyName = "SourceLogFile";
-            //        SourceLogFile.HeaderText = "SourceLogFile";
-            //        SourceLogFile.Name = "SourceLogFile";
-            //        SourceLogFile.ReadOnly = true;
-
-            //        dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            //                                                            EntryNumber,
-            //                                                            Level,
-            //                                                            Info,
-            //                                                            ExInfo,
-            //                                                            SourceLogFile});
-            //    }
-            //});
-
-            //m_colBehaviors.Add(new LogBehavior
-            //{
-            //    BehaviorName = "STDesigner",
-            //    ParserRegex = m_regParsingReg2,
-            //    DateFormat = "yyyy-MM-dd HH:mm:ss,fff",
-            //    CreateGridCols = (dataGridView) =>
-            //    {
-
-            //        System.Windows.Forms.DataGridViewTextBoxColumn EntryTime = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn ThreadName = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn LogLevel = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn Info = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn ErrorInfo = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn Key = new DataGridViewTextBoxColumn();
-            //        System.Windows.Forms.DataGridViewTextBoxColumn SourceLogFile = new DataGridViewTextBoxColumn();
-
-            //        dataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            //                            EntryTime,
-            //                            ThreadName,
-            //                            LogLevel,
-            //                            Info,
-            //                            ErrorInfo,
-            //                            Key,
-            //                            SourceLogFile});
-
-            //        // 
-            //        // EntryTime
-            //        // 
-            //        EntryTime.DataPropertyName = "EntryTime";
-            //        EntryTime.HeaderText = "EntryTime";
-            //        EntryTime.Name = "EntryTime";
-            //        EntryTime.ReadOnly = true;
-            //        // 
-            //        // ThreadName
-            //        // 
-            //        ThreadName.DataPropertyName = "ThreadName";
-            //        ThreadName.HeaderText = "ThreadName";
-            //        ThreadName.Name = "ThreadName";
-            //        ThreadName.ReadOnly = true;
-            //        // 
-            //        // LogLevel
-            //        // 
-            //        LogLevel.DataPropertyName = "LogLevel";
-            //        LogLevel.HeaderText = "LogLevel";
-            //        LogLevel.Name = "LogLevel";
-            //        LogLevel.ReadOnly = true;
-            //        // 
-            //        // Info
-            //        // 
-            //        Info.DataPropertyName = "Info";
-            //        Info.HeaderText = "Info";
-            //        Info.Name = "Info";
-            //        Info.ReadOnly = true;
-            //        // 
-            //        // ErrorInfo
-            //        // 
-            //        ErrorInfo.DataPropertyName = "ErrorInfo";
-            //        ErrorInfo.HeaderText = "ErrorInfo";
-            //        ErrorInfo.Name = "ErrorInfo";
-            //        ErrorInfo.ReadOnly = true;
-            //        // 
-            //        // Key
-            //        // 
-            //        Key.DataPropertyName = "Key";
-            //        Key.HeaderText = "Key";
-            //        Key.Name = "Key";
-            //        Key.ReadOnly = true;
-            //        // 
-            //        // SourceLogFile
-            //        // 
-            //        SourceLogFile.DataPropertyName = "SourceLogFile";
-            //        SourceLogFile.HeaderText = "SourceLogFile";
-            //        SourceLogFile.Name = "SourceLogFile";
-            //        SourceLogFile.ReadOnly = true;
-            //    }
-            //});
-
-
 
             try
             {
-                //Console.Out.WriteLine(MaskStringToNumbers("dfgdfg dfg 34234ms"));
                 InitializeComponent();
 
                 foreach (LogBehavior b in m_colBehaviors)
@@ -303,160 +127,9 @@ namespace LogViewer
                 return 0;
         }
 
-        /// <summary>
-        /// parses a single log line assuming format is according to Tira Standards
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="p_drPrevRow"></param>
-        /// <returns>the row created, else retruns null to indicate this row was added to prev row since it had no row header</returns>
-        private DSLogData.LogEntriesRow ParseLogLine(string line, ref DSLogData.LogEntriesRow p_drPrevRow)
-        {
 
 
-            //--------prepare and check data--------
-            if (line == null || line.Trim() == "")
-                return null;
-            DSLogData.LogEntriesRow row = m_objDummyTable.NewLogEntriesRow();
-            string[] arrStrings = line.Split(new string[1] { "||" }, StringSplitOptions.RemoveEmptyEntries);
 
-            string strHeaderData = arrStrings[0];
-            string[] arrHeaderSplit = strHeaderData.Split("[] \t".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-            //if parse went badly - it's not a log line (no header)
-            if (arrHeaderSplit.Length != 4)
-            {
-                //add the line to previous error log entry
-                p_drPrevRow.ErrorInfo += "\r\n" + line.Replace("\a", "");
-                return null;
-            }
-
-            //get time as DateTime
-            arrHeaderSplit[1] = arrHeaderSplit[1].Replace(',', '.');
-            DateTime time = new DateTime();
-            bool blnParseOk = DateTime.TryParse(arrHeaderSplit[0] + "/" + DateTime.Now.Year + " " + arrHeaderSplit[1], out time);
-
-            //if parse went badly - it's not a log line (no date)
-            if (!blnParseOk)
-            {
-                //add the line to previous error log entry
-                p_drPrevRow.ErrorInfo += "\n\r" + line;
-                return null;
-            }
-
-            //----start filling the row after performing all these checks----
-
-            //save prev row
-            //m_drPrevRow = row;
-            row = m_objDummyTable.NewLogEntriesRow();
-
-            row.ThreadName = arrHeaderSplit[2];
-            row.LogLevel = arrHeaderSplit[3];
-
-            row.EntryTime = time;
-            int intStartInfoPos = 3;
-            if (arrStrings.Length >= 3)
-            {
-
-                //second in large array is the user
-                row.UserName = arrStrings[1];
-
-                //third in large array is the system name
-                row.ComputerName = arrStrings[2];
-            }
-            else
-            {
-                intStartInfoPos = 0;
-            }
-
-            //others are info
-            int intEndInfoPos = arrStrings.Length;
-            bool isErrorRow = (row.LogLevel == "ERROR");
-            if (isErrorRow)
-                intEndInfoPos = arrStrings.Length - 1;
-            row.Info = "";
-            row.ErrorInfo = "";
-            StringBuilder sbErrorInfo = new StringBuilder();
-            for (int i = intStartInfoPos; i < intEndInfoPos; ++i)
-            {
-                if (row.Info == "")
-                {
-                    if (m_colNumMaskedColumns.Contains("info"))
-                        row["InfoNumbers"] = MaskStringToNumber(arrStrings[i]);
-                    //else
-                    row.Info = arrStrings[i];
-                }
-                else
-                {
-                    string str = arrStrings[i];
-                    if (m_colNumMaskedColumns.Contains("errorinfo"))
-                        row["ErrorinfoNumbers"] = MaskStringToNumber(str);
-
-                    //if (m_colNumMaskedColumns.Contains("errorinfo"))
-                    //  str = MaskStringToNumbers(str);
-
-                    if (sbErrorInfo.Length == 0)
-                        sbErrorInfo.Append(str);
-                    //row.ErrorInfo += arrStrings[i];
-                    else
-                        sbErrorInfo.Append(" || " + str);
-                    //row.ErrorInfo += " || " + arrStrings[i];
-                }
-
-            }
-            row.ErrorInfo = sbErrorInfo.ToString();
-
-            if (isErrorRow && String.IsNullOrEmpty(row.ErrorInfo))
-            {
-                row.ErrorInfo += arrStrings[arrStrings.Length - 1];
-            }
-            row.Key = m_intLineCount;
-
-            return row;
-        }
-
-        //public enum GET_FILEEX_INFO_LEVELS
-        //{
-        //    GetFileExInfoStandard,
-        //    GetFileExMaxInfoLevel
-        //}
-
-        //[StructLayout(LayoutKind.Sequential)]
-        //public struct WIN32_FILE_ATTRIBUTE_DATA
-        //{
-        //    public FileAttributes dwFileAttributes;
-        //    public FILETIME ftCreationTime;
-        //    public FILETIME ftLastAccessTime;
-        //    public FILETIME ftLastWriteTime;
-        //    public uint nFileSizeHigh;
-        //    public uint nFileSizeLow;
-        //}
-
-
-        //[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        //[return: MarshalAs(UnmanagedType.Bool)]
-        //static extern bool GetFileAttributesEx(string lpFileName,
-        //  GET_FILEEX_INFO_LEVELS fInfoLevelId, out WIN32_FILE_ATTRIBUTE_DATA fileData);
-
-        //private DateTime ConvertToDateTime(FILETIME ft)
-        //{
-        //    long hFT2 = (((long)ft.dwHighDateTime & (long)0xffffffffL) << 32) + ((long)(ft.dwLowDateTime & (long)0xffffffffL));
-        //    DateTime dte = DateTime.FromFileTime((long)hFT2);
-        //    return dte;
-        //}
-
-
-        //DateTime GetFileLastModifiedTime(string fullpath )
-        //{
-        //    string name = Path.GetFileName(fullpath);
-        //    WIN32_FILE_ATTRIBUTE_DATA info;
-        //    GetFileAttributesEx(fullpath, GET_FILEEX_INFO_LEVELS.GetFileExMaxInfoLevel, out info);
-        //    //DateTime creationTime = ConvertToDateTime(info.ftCreationTime);
-        //    //DateTime lastAccessTime = ConvertToDateTime(info.ftLastAccessTime);
-        //    DateTime lastWriteTime = ConvertToDateTime(info.ftLastWriteTime);
-        //    //long lngFileSize = ((info.nFileSizeHigh << 0x20) | (info.nFileSizeLow & ((long)0xffffffffL)));
-        //    //FileAttributes fileAttributes = info.dwFileAttributes;
-        //    return lastWriteTime;
-        //}
         bool IsLineInFilter(string strLogFile, DSLogData.LogEntriesRow row)
         {
             string a = row.IsInfoNull() ? null : row.Info;
@@ -464,7 +137,6 @@ namespace LogViewer
             string c = row.IsUserNameNull() ? null : row.UserName;
             string d = row.IsLogLevelNull() ? null : row.LogLevel;
             string line = a + " " + b + " " + c + " " + d;
-            //line.Split(new string[1] { "||" }, StringSplitOptions.RemoveEmptyEntries);
 
             //if we have a line filter, use it.
             if (m_colLineFilter.ContainsKey(strLogFile))
@@ -474,6 +146,7 @@ namespace LogViewer
                 if (wc != null && !wc.IsMatch(line.Replace('\n', ' ').Replace('\a', ' ').Replace('\r', ' ')))
                     return false;
             }
+
             //if we have a global line filter use it..
             else if (m_objGlobalLineFilter != null)
             {
@@ -487,9 +160,6 @@ namespace LogViewer
 
         public void ImportRowToTable(DataRow row, DataTable table)
         {
-            //DSLogData.LogEntriesRow newRow = m_dtlogEntries.NewLogEntriesRow();
-            //newRow.ItemArray = m_drPrevRow.ItemArray;
-            //m_dtlogEntries.AddLogEntriesRow(newRow);
             DataRow newRow = table.NewRow();
             newRow.ItemArray = row.ItemArray;
 
@@ -507,134 +177,6 @@ namespace LogViewer
                         m_objDummyTable.Columns.Add(strColName, typeof(string));
                 }
         }
-        /// <summary>
-        /// parses log file from the given position and on
-        /// </summary>
-        /// <param name="p_strLogFileName"></param>
-        /// <param name="p_intStartPos"></param>
-        /// <returns></returns>
-        //public long ParseLogFile(string p_strLogFileName, long p_intStartPos)
-        //{
-        //    m_dtlogEntries.BeginLoadData();
-        //    long lngEndReadPos = 0;
-        //    try
-        //    {
-        //        using (FileStream objFStream = new FileStream(p_strLogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-        //        {
-        //            objFStream.Position = p_intStartPos;
-        //            using (StreamReader objReader = new StreamReader(objFStream, Encoding.GetEncoding("windows-1255")))
-        //            {
-        //                string strLine = objReader.ReadLine();
-
-        //                DSLogData.LogEntriesRow drRow = m_objDummyTable.NewLogEntriesRow();
-        //                m_drPrevRow = drRow;
-        //                //if (strLine != null && strLine.Contains("SPC"))
-        //                //{ }
-
-        //                while (strLine != null)
-        //                {
-
-        //                    //m_drPrevRow = drRow;
-        //                    //if (IsLineInFilter(p_strLogFileName, strLine))
-        //                    drRow = ParseLogLine(strLine, ref m_drPrevRow);
-        //                    if (drRow != null)
-        //                    {
-        //                        if (IsLineInFilter(p_strLogFileName, m_drPrevRow) && !m_drPrevRow.IsKeyNull())
-        //                        {
-        //                            //DSLogData.LogEntriesRow newRow = m_dtlogEntries.NewLogEntriesRow();
-        //                            //newRow.ItemArray = m_drPrevRow.ItemArray;
-        //                            //m_dtlogEntries.AddLogEntriesRow(newRow);
-        //                            ImportRowToTable(m_drPrevRow, m_dtlogEntries);
-        //                            //m_drPrevRow.Delete();
-        //                        }
-        //                        m_drPrevRow = drRow;
-        //                    }
-        //                    //else
-        //                    //drRow = null;
-        //                    while (drRow == null)
-        //                    {
-        //                        strLine = objReader.ReadLine();
-        //                        //if (strLine != null && strLine.Contains("SPC"))
-        //                        //{ }
-
-
-        //                        if (strLine == null)
-        //                        {
-
-        //                            return (objFStream.Position);
-        //                        }
-
-        //                        drRow = ParseLogLine(strLine, ref m_drPrevRow);
-        //                        if (drRow != null)
-        //                        {
-        //                            if (IsLineInFilter(p_strLogFileName, m_drPrevRow) && !m_drPrevRow.IsKeyNull())
-        //                            {
-        //                                //m_drPrevRow.Delete();
-        //                                ImportRowToTable(m_drPrevRow, m_dtlogEntries);
-        //                            }
-        //                            m_drPrevRow = drRow;
-        //                        }
-        //                        //else
-        //                        //continue;
-        //                    }
-
-        //                    if (drRow.ThreadName != null && drRow.ThreadName != "")
-        //                    {
-        //                        ++m_intLineCount;
-        //                        drRow.SourceLogFile = Path.GetFileName(p_strLogFileName);
-        //                        if (p_strLogFileName.StartsWith("\\\\"))
-        //                        {
-        //                            drRow.ServerName = p_strLogFileName.Substring(2, p_strLogFileName.IndexOf('\\', 3) - 2);
-        //                        }
-        //                        else
-        //                            drRow.ServerName = "localhost";
-
-        //                        //if (IsLineInFilter(p_strLogFileName, drRow.Info + " " + drRow.RowError))
-        //                        //m_dtlogEntries.AddLogEntriesRow(drRow);
-        //                    }
-        //                    //read next line
-        //                    strLine = objReader.ReadLine();
-        //                    //if (strLine != null && strLine.Contains("SPC"))
-        //                    //{ }
-
-        //                }
-
-        //                //check the last line
-        //                if (drRow != null)
-        //                {
-        //                    if (IsLineInFilter(p_strLogFileName, drRow) && !m_drPrevRow.IsKeyNull())
-        //                    {
-        //                        ImportRowToTable(drRow, m_dtlogEntries);
-        //                        //m_dtlogEntries.ImportRow(drRow);
-        //                        //drRow.Delete();
-        //                    }
-        //                }
-
-        //                lngEndReadPos = objFStream.Position;
-        //            }
-        //        }
-        //    }
-        //    catch
-        //    {
-        //        //only open a file in notepad if it's a new file causing the problem...
-        //        if (p_intStartPos == 0)
-        //        {
-        //            FRMVanishingAlert.ShowForm(2, "Wrong Log Format", "Not a Tira log,\r\n\rOpening Notepad", "", "", 0, 0, true, FormStartPosition.Manual, false);
-
-        //            string strWinDir = Environment.GetEnvironmentVariable("SystemRoot");
-        //            Process.Start(strWinDir + "\\notepad.exe", p_strLogFileName);
-        //            //this.Visible = false;
-        //        }
-        //        return long.MinValue;
-        //    }
-        //    finally
-        //    {
-        //        m_dtlogEntries.EndLoadData();
-        //        CreateDummyTable();
-        //    }
-
-        //    return lngEndReadPos;
-        //}
 
         /// <summary>
         /// discovers the correct parser to use for this log file
@@ -693,6 +235,7 @@ namespace LogViewer
         {
             m_dtlogEntries.BeginLoadData();
             long lngEndReadPos = 0;
+            long progressbytes = 0;
             try
             {
                 using (FileStream objFStream = new FileStream(p_strLogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -726,9 +269,15 @@ namespace LogViewer
                             else
                                 drRow.EntryTime = dtmTemp;
 
-                            if (strLevel.ToLower() == "error")
+                            if (strLevel.ToLower().StartsWith("inf"))
+                                strLevel = "INFO";
+                            else if (strLevel.ToLower().StartsWith("deb"))
+                                strLevel = "DEBUG";
+                            else if (strLevel.ToLower().StartsWith("err"))
                                 strLevel = "ERROR";
-                            if (strLevel.ToLower() == "warning")
+                            else if (strLevel.ToLower().StartsWith("fat"))
+                                strLevel = "FATAL";
+                            else if (strLevel.ToLower().StartsWith("warn"))
                                 strLevel = "WARN";
 
                             //drRow.EntryTime = DateTime.Parse(strDate);
@@ -756,9 +305,12 @@ namespace LogViewer
                                 ++m_intLineCount;
                                 ImportRowToTable(drRow, m_dtlogEntries);
                             }
+                            progressbytes += match.Length + 2;
+                            ProgressBarManager.IncrementProgress(match.Length + 2);
                         }
 
                         lngEndReadPos = objFStream.Position;
+                        ProgressBarManager.IncrementProgress(lngEndReadPos - progressbytes);
                     }
                 }
             }
@@ -828,10 +380,6 @@ namespace LogViewer
         int m_intUserSelectionKey = -1;
         private void RefreshFilter()
         {
-
-
-
-
             string strFilter = "";
             if (m_strLevelFilter != "")
             {
@@ -979,6 +527,8 @@ namespace LogViewer
                         //set the grid columns
                         dataGridView1.Columns.Clear();
                         m_objChosenBehavior.CreateGridCols(dataGridView1);
+                        cmbLevel.SelectedIndex = 2;
+                        cmbBehaviors_SelectedIndexChanged(null, null);
                     }
                 }
 
@@ -1166,12 +716,24 @@ namespace LogViewer
         {
             e.Data.GetDataPresent("FileDrop", false);
             string[] files = (string[])e.Data.GetData("FileDrop", false);
+
+            long totalSize = 0;
+            foreach (string file in files)
+            {
+                if (File.Exists(file) && !m_colWatchedFiles.ContainsKey(file))
+                    totalSize += (new FileInfo(file)).Length;
+            }
+
+            ProgressBarManager.ClearProgress();
+            ProgressBarManager.ShowProgressBar(totalSize);
             foreach (string file in files)
             {
                 AddFile(file);
             }
+            ProgressBarManager.CloseProgress();
             if (m_colWatchedFiles.Count == 0) Application.Exit();
         }
+
         private void HandleDragEnter(DragEventArgs e)
         {
             if (e.Data.GetDataPresent("FileDrop", false)) e.Effect = DragDropEffects.Copy;
@@ -1480,7 +1042,7 @@ namespace LogViewer
             ExportToCsvFile(csvFileName);
 
         }
-        
+
         Encoding m_objEncoding = Encoding.ASCII;
         Encoding CurrentEncoding
         {
@@ -1498,8 +1060,8 @@ namespace LogViewer
                         return m_objEncoding;
                     }
                 }
-                catch{ }
-            
+                catch { }
+
                 CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
                 int codePage = cultureInfo.TextInfo.ANSICodePage;
                 m_objEncoding = codePage.Equals(0) ?
@@ -1511,7 +1073,7 @@ namespace LogViewer
 
         private void ExportToCsvFile(string csvFileName)
         {
-        
+
             try
             {
                 //export
