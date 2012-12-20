@@ -81,6 +81,8 @@ namespace LogViewer
                         m_frm.ProgressBarControl.Value = newValue;
                         m_intPrevValue = m_frm.ProgressBarControl.Value;
                         m_frm.SetLableText(m_labelText);
+                        m_frm.Invalidate();
+                        m_frm.Refresh();
                     });
                 }
                 else
@@ -108,7 +110,6 @@ namespace LogViewer
 
         public static void CloseProgress()
         {
-            SetProgress(100);
             m_frm.Invoke((ThreadStart)delegate
             {
                 m_frm.Hide();

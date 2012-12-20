@@ -235,8 +235,9 @@ namespace LogViewer
         public long ParseLogFileRegExp(string p_strLogFileName, long p_intStartPos)
         {
             m_dtlogEntries.BeginLoadData();
-            long lngEndReadPos = 0;
+            long lngFileTotalBytes = 0;
             long progressbytes = 0;
+
             try
             {
                 using (FileStream objFStream = new FileStream(p_strLogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -246,7 +247,7 @@ namespace LogViewer
                     {
 
                         string strAllText = objReader.ReadToEnd();
-
+                        lngFileTotalBytes = strAllText.Length;
                         //m_drPrevRow = drRow;
                         MatchCollection colMatches = m_objChosenBehavior.ParserRegex.Matches(strAllText);
                         foreach (Match match in colMatches)
@@ -306,12 +307,12 @@ namespace LogViewer
                                 ++m_intLineCount;
                                 ImportRowToTable(drRow, m_dtlogEntries);
                             }
-                            progressbytes += match.Length + 2;
-                            ProgressBarManager.IncrementProgress(match.Length + 2);
+                            int increment = (int)((double)lngFileTotalBytes / (double)colMatches.Count);
+                            progressbytes += increment;
+                            ProgressBarManager.IncrementProgress(increment);
                         }
 
-                        lngEndReadPos = objFStream.Position;
-                        ProgressBarManager.IncrementProgress(lngEndReadPos - progressbytes);
+                        ProgressBarManager.IncrementProgress(lngFileTotalBytes - progressbytes);
                     }
                 }
             }
@@ -334,7 +335,7 @@ namespace LogViewer
                 CreateDummyTable();
             }
 
-            return lngEndReadPos;
+            return lngFileTotalBytes;
         }
 
 
@@ -541,7 +542,7 @@ namespace LogViewer
                             }
                             cmbBehaviors_SelectedIndexChanged(null, null);
                         }
-                        
+
                     }
                 }
 
@@ -806,7 +807,7 @@ namespace LogViewer
             }
         }
 
-        string m_strServerScriptFile = null;
+        //string m_strServerScriptFile = null;
         PreFilterCard m_frmBatchCollector = new PreFilterCard();
         private void loadServerListToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -906,16 +907,16 @@ namespace LogViewer
                 //    // a log directory line is the default line type
                 //    colLogDirectories.Add(line);
                 //}
-                PreFilterCard card = new PreFilterCard();
-                card.LoadPreset(file);
+                // PreFilterCard card = new PreFilterCard();
+                m_frmBatchCollector.LoadPreset(file);
                 //if the file doesn't contain server lines, use it as a global filter description file
-                if (card.LogDirectories.Count == 0)
+                if (m_frmBatchCollector.LogDirectories.Count == 0)
                 {
-                    m_objGlobalLineFilter = card.CardsLineFilter;
+                    m_objGlobalLineFilter = m_frmBatchCollector.CardsLineFilter;
                 }
 
-                foreach (string directory in card.LogDirectories)
-                    ProcessLogDirectory(card.ExcludeList, card.IncludeList, card.CardsLineFilter, card.History, directory);
+                foreach (string directory in m_frmBatchCollector.LogDirectories)
+                    ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
             }
         }
 
