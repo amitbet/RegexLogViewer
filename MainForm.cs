@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using System.Globalization;
+using System.Configuration;
 
 namespace LogViewer
 {
@@ -507,7 +508,7 @@ namespace LogViewer
                     using (StreamReader sr = new StreamReader(fs))
                     {
                         //get the first lines of the file
-                        for (int i = 0; i < 150; i++)
+                        for (int i = 0; i < 50; i++)
                         {
                             string line = sr.ReadLine();
                             if (line == null)
@@ -527,8 +528,20 @@ namespace LogViewer
                         //set the grid columns
                         dataGridView1.Columns.Clear();
                         m_objChosenBehavior.CreateGridCols(dataGridView1);
-                        cmbLevel.SelectedIndex = 2;
-                        cmbBehaviors_SelectedIndexChanged(null, null);
+
+                        //set the default error level filter to initialize display.
+                        string strDefaultLevel = ConfigurationManager.AppSettings["DefaultLogLevel"];
+                        if (!string.IsNullOrEmpty(strDefaultLevel))
+                        {
+                            for (int i = 0; i < cmbLevel.Items.Count; ++i)
+                            {
+                                string item = (string)cmbLevel.Items[i];
+                                if (item.Equals(strDefaultLevel, StringComparison.InvariantCultureIgnoreCase))
+                                    cmbLevel.SelectedIndex = i;
+                            }
+                            cmbBehaviors_SelectedIndexChanged(null, null);
+                        }
+                        
                     }
                 }
 

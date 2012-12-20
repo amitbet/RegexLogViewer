@@ -21,8 +21,8 @@
       <string>info</string>
     </GridCols>
     <DateFormat>dd/MM HH:mm:ss,fff</DateFormat>
-    <ParserRegexPatternCData><![CDATA[(?:(?<exinfo>(?<file>[\w\d\s\.]*)\((?<line>\d{1,5}),(?<column>\d{1,5})\)):\s(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])|(?:(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])]]></ParserRegexPatternCData>
-    <ParserRegexOptionsString>IgnoreCase Compiled</ParserRegexOptionsString>
+    <ParserRegexPatternCData><![CDATA[^[\d]{0,3}>?(?<exinfo>[\:\w\d\s\.\\]*\(\d{1,5},?\d{0,5}\)):\s(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r]]]></ParserRegexPatternCData>
+    <ParserRegexOptionsString>IgnoreCase Compiled Singleline MultiLine</ParserRegexOptionsString>
     <BehaviorName>VisualStudio</BehaviorName>
   </LogBehavior>
   <LogBehavior>
