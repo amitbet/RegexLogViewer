@@ -717,6 +717,11 @@ namespace LogViewer
             e.Data.GetDataPresent("FileDrop", false);
             string[] files = (string[])e.Data.GetData("FileDrop", false);
 
+            AddLogFiles(files);
+        }
+
+        private void AddLogFiles(string[] files)
+        {
             long totalSize = 0;
             foreach (string file in files)
             {
@@ -725,6 +730,7 @@ namespace LogViewer
             }
 
             ProgressBarManager.ClearProgress();
+            ProgressBarManager.SetLableText("Adding Files:");
             ProgressBarManager.ShowProgressBar(totalSize);
             foreach (string file in files)
             {
@@ -788,113 +794,115 @@ namespace LogViewer
         }
 
         string m_strServerScriptFile = null;
+        PreFilterCard m_frmBatchCollector = new PreFilterCard();
         private void loadServerListToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DialogResult res = openFileDialog1.ShowDialog();
-            if (res == DialogResult.Cancel)
-                return;
-
-            string file = openFileDialog1.FileName;
-            if (File.Exists(file))
+            if (m_frmBatchCollector.ShowDialog() == DialogResult.OK)
             {
-                m_strServerScriptFile = file;
-                LoadServerListFile(file);
+
+                if (m_frmBatchCollector.LogDirectories.Count == 0)
+                {
+                    m_objGlobalLineFilter = m_frmBatchCollector.CardsLineFilter;
+                }
+
+                foreach (string directory in m_frmBatchCollector.LogDirectories)
+                    ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
+                
+                //perform a memory collection
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
             }
-
-            //perform a memory collection
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-
         }
 
         private void LoadServerListFile(string file)
         {
-            List<string> colExcludeList = new List<string>();
-            List<string> colIncludeList = new List<string>();
-            List<string> colLogDirectories = new List<string>();
-            m_colNumMaskedColumns = new List<string>();
-            WildCards cardsLineFilter = null;
-            int intHistory = NUM_LATEST_FILES_TO_COLLECT;
+            //List<string> colExcludeList = new List<string>();
+            //List<string> colIncludeList = new List<string>();
+            //List<string> colLogDirectories = new List<string>();
+            //m_colNumMaskedColumns = new List<string>();
+            //WildCards cardsLineFilter = null;
+            //int intHistory = NUM_LATEST_FILES_TO_COLLECT;
 
             if (File.Exists(file))
             {
-                m_strServerScriptFile = file;
-                //each line in file should hold a log directory in a server e.g.: "\\inttiradev1\c$\log\" 
-                string[] lines = File.ReadAllLines(file);
-                foreach (string line in lines)
-                {
-                    if (String.IsNullOrEmpty(line.Trim()))
-                        continue;
+                //m_strServerScriptFile = file;
+                ////each line in file should hold a log directory in a server e.g.: "\\inttiradev1\c$\log\" 
+                //string[] lines = File.ReadAllLines(file);
+                //foreach (string line in lines)
+                //{
+                //    if (String.IsNullOrEmpty(line.Trim()))
+                //        continue;
 
-                    //get all exclude lines and construct exclude list
-                    if (line.Trim().ToLower().StartsWith("exclude:"))
-                    {
-                        string[] excludes = line.Trim().ToLower().Substring(9).Split(",;".ToCharArray());
-                        colExcludeList.AddRange(excludes);
-                        continue;
-                    }
+                //    //get all exclude lines and construct exclude list
+                //    if (line.Trim().ToLower().StartsWith("exclude:"))
+                //    {
+                //        string[] excludes = line.Trim().ToLower().Substring(9).Split(",;".ToCharArray());
+                //        colExcludeList.AddRange(excludes);
+                //        continue;
+                //    }
 
-                    //let the user decide how many files back he wants
-                    if (line.Trim().ToLower().StartsWith("history:"))
-                    {
-                        string strHistory = line.Trim().ToLower().Substring(9).Trim();
-                        intHistory = NUM_LATEST_FILES_TO_COLLECT;
-                        bool ok = int.TryParse(strHistory, out intHistory);
-                        if (!ok)
-                            intHistory = NUM_LATEST_FILES_TO_COLLECT;
+                //    //let the user decide how many files back he wants
+                //    if (line.Trim().ToLower().StartsWith("history:"))
+                //    {
+                //        string strHistory = line.Trim().ToLower().Substring(9).Trim();
+                //        intHistory = NUM_LATEST_FILES_TO_COLLECT;
+                //        bool ok = int.TryParse(strHistory, out intHistory);
+                //        if (!ok)
+                //            intHistory = NUM_LATEST_FILES_TO_COLLECT;
 
-                        continue;
-                    }
+                //        continue;
+                //    }
 
-                    //get all exclude lines and construct exclude list
-                    if (line.Trim().ToLower().StartsWith("include:"))
-                    {
-                        string[] includes = line.Trim().ToLower().Substring(9).Split(",;".ToCharArray());
-                        colIncludeList.AddRange(includes);
-                        continue;
-                    }
+                //    //get all exclude lines and construct exclude list
+                //    if (line.Trim().ToLower().StartsWith("include:"))
+                //    {
+                //        string[] includes = line.Trim().ToLower().Substring(9).Split(",;".ToCharArray());
+                //        colIncludeList.AddRange(includes);
+                //        continue;
+                //    }
 
-                    //get wildcards for line filtering
-                    if (line.Trim().ToLower().StartsWith("linefilter:"))
-                    {
-                        string includes = line.Trim().Substring(11);
-                        cardsLineFilter = new WildCards("*" + includes.Trim() + "*");
-                        continue;
-                    }
+                //    //get wildcards for line filtering
+                //    if (line.Trim().ToLower().StartsWith("linefilter:"))
+                //    {
+                //        string includes = line.Trim().Substring(11);
+                //        cardsLineFilter = new WildCards("*" + includes.Trim() + "*");
+                //        continue;
+                //    }
 
-                    //get wildcards for line filtering
-                    if (line.Trim().ToLower().StartsWith("numbermaskedcolumns:"))
-                    {
-                        string[] columns = line.Substring(20).ToLower().Trim().Split(",;".ToCharArray());
-                        m_colNumMaskedColumns.AddRange(columns);
-                        foreach (string col in m_colNumMaskedColumns)
-                        {
-                            string strColName = col.Substring(0, 1).ToUpper() + col.Substring(1) + "Numbers";
-                            if (!m_dtlogEntries.Columns.Contains(strColName))
-                                m_dtlogEntries.Columns.Add(strColName, typeof(string));
-                        }
-                        foreach (string col in m_colNumMaskedColumns)
-                        {
-                            string strColName = col.Substring(0, 1).ToUpper() + col.Substring(1) + "Numbers";
-                            if (!m_objDummyTable.Columns.Contains(strColName))
-                                m_objDummyTable.Columns.Add(strColName, typeof(string));
-                        }
-                        continue;
-                    }
+                //    //get wildcards for line filtering
+                //    if (line.Trim().ToLower().StartsWith("numbermaskedcolumns:"))
+                //    {
+                //        string[] columns = line.Substring(20).ToLower().Trim().Split(",;".ToCharArray());
+                //        m_colNumMaskedColumns.AddRange(columns);
+                //        foreach (string col in m_colNumMaskedColumns)
+                //        {
+                //            string strColName = col.Substring(0, 1).ToUpper() + col.Substring(1) + "Numbers";
+                //            if (!m_dtlogEntries.Columns.Contains(strColName))
+                //                m_dtlogEntries.Columns.Add(strColName, typeof(string));
+                //        }
+                //        foreach (string col in m_colNumMaskedColumns)
+                //        {
+                //            string strColName = col.Substring(0, 1).ToUpper() + col.Substring(1) + "Numbers";
+                //            if (!m_objDummyTable.Columns.Contains(strColName))
+                //                m_objDummyTable.Columns.Add(strColName, typeof(string));
+                //        }
+                //        continue;
+                //    }
 
-                    // a log directory line is the default line type
-                    colLogDirectories.Add(line);
-                }
-
+                //    // a log directory line is the default line type
+                //    colLogDirectories.Add(line);
+                //}
+                PreFilterCard card = new PreFilterCard();
+                card.LoadPreset(file);
                 //if the file doesn't contain server lines, use it as a global filter description file
-                if (colLogDirectories.Count == 0)
+                if (card.LogDirectories.Count == 0)
                 {
-                    m_objGlobalLineFilter = cardsLineFilter;
+                    m_objGlobalLineFilter = card.CardsLineFilter;
                 }
 
-                foreach (string directory in colLogDirectories)
-                    ProcessLogDirectory(colExcludeList, colIncludeList, cardsLineFilter, intHistory, directory);
+                foreach (string directory in card.LogDirectories)
+                    ProcessLogDirectory(card.ExcludeList, card.IncludeList, card.CardsLineFilter, card.History, directory);
             }
         }
 
@@ -966,7 +974,8 @@ namespace LogViewer
                     else return 1;
                 });
 
-
+                List<string> colFilesForCollection = new List<string>();
+                long intTotalDirLogBytes =0;
                 for (int i = 0; i < intHistory; ++i)
                 {
                     if (colLogFiles.Count > i)
@@ -976,9 +985,14 @@ namespace LogViewer
                             m_colLineFilter[logFile] = cardsLineFilter;
                         else
                             m_colLineFilter.Add(logFile, cardsLineFilter);
-                        AddFile(logFile);
+                        colFilesForCollection.Add(logFile);
+                        intTotalDirLogBytes += (new FileInfo(logFile)).Length;
                     }
                 }
+                ProgressBarManager.ShowProgressBar(intTotalDirLogBytes);
+                ProgressBarManager.SetLableText("loading: "+dir);
+                colFilesForCollection.ForEach(f=>AddFile(f));
+                ProgressBarManager.CloseProgress();
             }
             catch (Exception ex)
             {
@@ -1017,7 +1031,13 @@ namespace LogViewer
             m_dtlogEntries.Clear();
             m_colWatchedFiles.Clear();
             lstFiles.Items.Clear();
-            LoadServerListFile(m_strServerScriptFile);
+            foreach (string directory in m_frmBatchCollector.LogDirectories)
+                ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
+
+            //perform a memory collection
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
         }
 
         private void closeAllToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1269,6 +1289,20 @@ namespace LogViewer
             if (!File.Exists(m_strBehaviorConfigFileName))
                 SaveBehaviorConfig();
 
+        }
+
+        private void addLogFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openFileDialog1.Filter = "log files|*.log";
+            DialogResult res = openFileDialog1.ShowDialog();
+            if (res == DialogResult.Cancel)
+                return;
+
+            string file = openFileDialog1.FileName;
+            if (File.Exists(file))
+            {
+                AddLogFiles(new string[] { file });
+            }
         }
     }
 }

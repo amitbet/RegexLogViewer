@@ -106,6 +106,7 @@
     <Compile Include="EntryCard.Designer.cs">
       <DependentUpon>EntryCard.cs</DependentUpon>
     </Compile>
+    <Compile Include="OpenFolderDialog.cs" />
     <Compile Include="PreFilterCard.cs">
       <SubType>Form</SubType>
     </Compile>

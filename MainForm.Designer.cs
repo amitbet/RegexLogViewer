@@ -40,10 +40,7 @@ namespace LogViewer
             this.Info = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ExInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.logEntriesBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.dSLogDataBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.dSLogData = new LogViewer.DSLogData();
             this.logEntriesBindingSource1 = new System.Windows.Forms.BindingSource(this.components);
-            this.dSLogDataBindingSource1 = new System.Windows.Forms.BindingSource(this.components);
             this.cmbLevel = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -75,25 +72,24 @@ namespace LogViewer
             this.clearEntriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopLiveListeningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startLiveListeningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.gCCollectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmbBehaviors = new System.Windows.Forms.ToolStripComboBox();
             this.chkPinTrack = new System.Windows.Forms.CheckBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.lblCount = new System.Windows.Forms.Label();
             this.lblMemory = new System.Windows.Forms.Label();
+            this.addLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dSLogDataBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.dSLogData = new LogViewer.DSLogData();
+            this.dSLogDataBindingSource1 = new System.Windows.Forms.BindingSource(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.logEntriesBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.logEntriesBindingSource1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource1)).BeginInit();
             this.cmsFiles.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dSLogData)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource1)).BeginInit();
             this.SuspendLayout();
-            // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // dataGridView1
             // 
@@ -184,25 +180,10 @@ namespace LogViewer
             this.logEntriesBindingSource.DataMember = "LogEntries";
             this.logEntriesBindingSource.DataSource = this.dSLogDataBindingSource;
             // 
-            // dSLogDataBindingSource
-            // 
-            this.dSLogDataBindingSource.DataSource = this.dSLogData;
-            this.dSLogDataBindingSource.Position = 0;
-            // 
-            // dSLogData
-            // 
-            this.dSLogData.DataSetName = "DSLogData";
-            this.dSLogData.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
             // logEntriesBindingSource1
             // 
             this.logEntriesBindingSource1.DataMember = "LogEntries";
             this.logEntriesBindingSource1.DataSource = this.dSLogDataBindingSource1;
-            // 
-            // dSLogDataBindingSource1
-            // 
-            this.dSLogDataBindingSource1.DataSource = this.dSLogData;
-            this.dSLogDataBindingSource1.Position = 0;
             // 
             // cmbLevel
             // 
@@ -393,9 +374,10 @@ namespace LogViewer
             // asdToolStripMenuItem
             // 
             this.asdToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addLogFileToolStripMenuItem,
+            this.closeAllToolStripMenuItem,
             this.loadServerListToolStripMenuItem,
             this.reloadLastServerListToolStripMenuItem,
-            this.closeAllToolStripMenuItem,
             this.exportToSsvFileToolStripMenuItem,
             this.generateCsvReportToolStripMenuItem,
             this.generateCvsReport3GramToolStripMenuItem});
@@ -406,43 +388,43 @@ namespace LogViewer
             // loadServerListToolStripMenuItem
             // 
             this.loadServerListToolStripMenuItem.Name = "loadServerListToolStripMenuItem";
-            this.loadServerListToolStripMenuItem.Size = new System.Drawing.Size(271, 24);
-            this.loadServerListToolStripMenuItem.Text = "Load Server List";
+            this.loadServerListToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
+            this.loadServerListToolStripMenuItem.Text = "Batch Collection";
             this.loadServerListToolStripMenuItem.Click += new System.EventHandler(this.loadServerListToolStripMenuItem_Click);
             // 
             // reloadLastServerListToolStripMenuItem
             // 
             this.reloadLastServerListToolStripMenuItem.Name = "reloadLastServerListToolStripMenuItem";
-            this.reloadLastServerListToolStripMenuItem.Size = new System.Drawing.Size(271, 24);
-            this.reloadLastServerListToolStripMenuItem.Text = "Reload Server List";
+            this.reloadLastServerListToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
+            this.reloadLastServerListToolStripMenuItem.Text = "Recollect batch";
             this.reloadLastServerListToolStripMenuItem.Click += new System.EventHandler(this.reloadLastServerListToolStripMenuItem_Click);
             // 
             // closeAllToolStripMenuItem
             // 
             this.closeAllToolStripMenuItem.Name = "closeAllToolStripMenuItem";
-            this.closeAllToolStripMenuItem.Size = new System.Drawing.Size(271, 24);
+            this.closeAllToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
             this.closeAllToolStripMenuItem.Text = "Clear All";
             this.closeAllToolStripMenuItem.Click += new System.EventHandler(this.closeAllToolStripMenuItem_Click);
             // 
             // exportToSsvFileToolStripMenuItem
             // 
             this.exportToSsvFileToolStripMenuItem.Name = "exportToSsvFileToolStripMenuItem";
-            this.exportToSsvFileToolStripMenuItem.Size = new System.Drawing.Size(271, 24);
-            this.exportToSsvFileToolStripMenuItem.Text = "Export to csv File";
+            this.exportToSsvFileToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
+            this.exportToSsvFileToolStripMenuItem.Text = "Export gridview to csv file";
             this.exportToSsvFileToolStripMenuItem.Click += new System.EventHandler(this.exportToCsvFileToolStripMenuItem_Click);
             // 
             // generateCsvReportToolStripMenuItem
             // 
             this.generateCsvReportToolStripMenuItem.Name = "generateCsvReportToolStripMenuItem";
-            this.generateCsvReportToolStripMenuItem.Size = new System.Drawing.Size(271, 24);
-            this.generateCsvReportToolStripMenuItem.Text = "Generate Csv Report";
+            this.generateCsvReportToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
+            this.generateCsvReportToolStripMenuItem.Text = "Generate csv report";
             this.generateCsvReportToolStripMenuItem.Click += new System.EventHandler(this.generateCsvReportToolStripMenuItem_Click);
             // 
             // generateCvsReport3GramToolStripMenuItem
             // 
             this.generateCvsReport3GramToolStripMenuItem.Name = "generateCvsReport3GramToolStripMenuItem";
-            this.generateCvsReport3GramToolStripMenuItem.Size = new System.Drawing.Size(271, 24);
-            this.generateCvsReport3GramToolStripMenuItem.Text = "Generate Cvs Report (3Gram)";
+            this.generateCvsReport3GramToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
+            this.generateCvsReport3GramToolStripMenuItem.Text = "Generate cvs report (3Gram)";
             this.generateCvsReport3GramToolStripMenuItem.Click += new System.EventHandler(this.generateCvsReport3GramToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
@@ -452,8 +434,7 @@ namespace LogViewer
             this.clearAllFilesToolStripMenuItem,
             this.clearEntriesToolStripMenuItem,
             this.stopLiveListeningToolStripMenuItem,
-            this.startLiveListeningToolStripMenuItem,
-            this.gCCollectToolStripMenuItem});
+            this.startLiveListeningToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(73, 28);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -492,13 +473,6 @@ namespace LogViewer
             this.startLiveListeningToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
             this.startLiveListeningToolStripMenuItem.Text = "Start Live Listening";
             this.startLiveListeningToolStripMenuItem.Click += new System.EventHandler(this.startLiveListeningToolStripMenuItem_Click);
-            // 
-            // gCCollectToolStripMenuItem
-            // 
-            this.gCCollectToolStripMenuItem.Name = "gCCollectToolStripMenuItem";
-            this.gCCollectToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
-            this.gCCollectToolStripMenuItem.Text = "GC Collect";
-            this.gCCollectToolStripMenuItem.Click += new System.EventHandler(this.gCCollectToolStripMenuItem_Click);
             // 
             // cmbBehaviors
             // 
@@ -542,6 +516,28 @@ namespace LogViewer
             this.lblMemory.Text = "Used Ram: 11MB";
             this.lblMemory.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // addLogFileToolStripMenuItem
+            // 
+            this.addLogFileToolStripMenuItem.Name = "addLogFileToolStripMenuItem";
+            this.addLogFileToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
+            this.addLogFileToolStripMenuItem.Text = "Add Log File";
+            this.addLogFileToolStripMenuItem.Click += new System.EventHandler(this.addLogFileToolStripMenuItem_Click);
+            // 
+            // dSLogDataBindingSource
+            // 
+            this.dSLogDataBindingSource.DataSource = this.dSLogData;
+            this.dSLogDataBindingSource.Position = 0;
+            // 
+            // dSLogData
+            // 
+            this.dSLogData.DataSetName = "DSLogData";
+            this.dSLogData.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
+            // 
+            // dSLogDataBindingSource1
+            // 
+            this.dSLogDataBindingSource1.DataSource = this.dSLogData;
+            this.dSLogDataBindingSource1.Position = 0;
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
@@ -579,13 +575,13 @@ namespace LogViewer
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.MainForm_DragEnter);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.logEntriesBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.logEntriesBindingSource1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource1)).EndInit();
             this.cmsFiles.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dSLogData)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -631,7 +627,6 @@ namespace LogViewer
         private System.Windows.Forms.ToolStripMenuItem closeAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportToSsvFileToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
-        private System.Windows.Forms.ToolStripMenuItem gCCollectToolStripMenuItem;
         private System.Windows.Forms.Label lblCount;
         private System.Windows.Forms.Label lblMemory;
         private System.Windows.Forms.ToolStripMenuItem generateCsvReportToolStripMenuItem;
@@ -641,6 +636,7 @@ namespace LogViewer
         private System.Windows.Forms.DataGridViewTextBoxColumn Info;
         private System.Windows.Forms.DataGridViewTextBoxColumn ExInfo;
         private System.Windows.Forms.ToolStripComboBox cmbBehaviors;
+        private System.Windows.Forms.ToolStripMenuItem addLogFileToolStripMenuItem;
     }
 }
 
