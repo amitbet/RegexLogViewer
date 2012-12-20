@@ -807,7 +807,7 @@ namespace LogViewer
 
                 foreach (string directory in m_frmBatchCollector.LogDirectories)
                     ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
-                
+
                 //perform a memory collection
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -975,7 +975,7 @@ namespace LogViewer
                 });
 
                 List<string> colFilesForCollection = new List<string>();
-                long intTotalDirLogBytes =0;
+                long intTotalDirLogBytes = 0;
                 for (int i = 0; i < intHistory; ++i)
                 {
                     if (colLogFiles.Count > i)
@@ -990,8 +990,8 @@ namespace LogViewer
                     }
                 }
                 ProgressBarManager.ShowProgressBar(intTotalDirLogBytes);
-                ProgressBarManager.SetLableText("loading: "+dir);
-                colFilesForCollection.ForEach(f=>AddFile(f));
+                ProgressBarManager.SetLableText("loading: " + dir);
+                colFilesForCollection.ForEach(f => AddFile(f));
                 ProgressBarManager.CloseProgress();
             }
             catch (Exception ex)
@@ -1017,6 +1017,7 @@ namespace LogViewer
         private void removeFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RemoveFileEntriesFromDataSet((string)lstFiles.SelectedItem);
+            m_colWatchedFiles.Remove((string)lstFiles.SelectedItem);
             lstFiles.Items.Remove(lstFiles.SelectedItem);
         }
 
