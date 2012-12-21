@@ -30,10 +30,8 @@ namespace LogViewer
         private DSLogData.LogEntriesDataTable m_dtlogEntries;
         private EntryCard m_frmCard = new EntryCard();
         private DataViewEx m_dvMainView = null;
-
         private int m_intLineCount = 0;
         private Regex regMaskStringToNumber = new Regex("[0-9]+", RegexOptions.Compiled);
-
         private Dictionary<string, long> m_colWatchedFiles = new Dictionary<string, long>();
         private string m_strLevelFilter = "";
         private string m_strTextFilter = "";
@@ -45,6 +43,45 @@ namespace LogViewer
         private List<string> m_colNumMaskedColumns = new List<string>();
         private Dictionary<string, WildCards> m_colLineFilter = new Dictionary<string, WildCards>();
         DSLogData.LogEntriesDataTable m_objDummyTable = null;
+        private string m_strBehaviorConfigFileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "BehaviorConfig.xml");
+        private int m_intUserSelectionKey = -1;
+        PreFilterCard m_frmBatchCollector = new PreFilterCard();
+        Encoding m_objEncoding = Encoding.ASCII;
+        Encoding CurrentEncoding
+        {
+            get
+            {
+                if (m_objEncoding != Encoding.ASCII)
+                    return m_objEncoding;
+
+                string encName = ConfigurationManager.AppSettings["Encoding"];
+                try
+                {
+                    if (!string.IsNullOrEmpty(encName))
+                    {
+                        m_objEncoding = Encoding.GetEncoding(encName.Trim());
+                        return m_objEncoding;
+                    }
+                }
+                catch { }
+
+                CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
+                int codePage = cultureInfo.TextInfo.ANSICodePage;
+                m_objEncoding = codePage.Equals(0) ?
+                                        Encoding.UTF8 :
+                                        Encoding.GetEncoding(codePage);
+                return m_objEncoding;
+            }
+        }
+
+
+        //used to decide on which method to base text comparison in report creation
+        private enum ReportGenMethod
+        {
+            ByTrigram,
+            ByStringCompare
+        }
+
         public MainForm()
         {
             if (File.Exists(m_strBehaviorConfigFileName))
@@ -92,14 +129,6 @@ namespace LogViewer
             }
         }
 
-        //used to decide on which method to base text comparison in report creation
-        enum ReportGenMethod
-        {
-            ByTrigram,
-            ByStringCompare
-        }
-
-        string m_strBehaviorConfigFileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "BehaviorConfig.xml");
         public void SaveBehaviorConfig()
         {
             XmlSerializer ser = new XmlSerializer(typeof(List<LogBehavior>));
@@ -127,9 +156,6 @@ namespace LogViewer
             else
                 return 0;
         }
-
-
-
 
         bool IsLineInFilter(string strLogFile, DSLogData.LogEntriesRow row)
         {
@@ -338,15 +364,6 @@ namespace LogViewer
             return lngFileTotalBytes;
         }
 
-
-        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            int intRowIndex = e.RowIndex;
-            //don't distrupt header operations
-            ShowLineCard(intRowIndex);
-
-        }
-
         private void ShowLineCard(int intRowIndex)
         {
             if (intRowIndex == -1)
@@ -366,20 +383,6 @@ namespace LogViewer
             this.TopMost = false;
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (cmbLevel.Text == "ALL")
-            {
-                m_strLevelFilter = "";
-            }
-            else
-            {
-                m_strLevelFilter = "LogLevel = '" + cmbLevel.Text + "'";
-            }
-            RefreshFilter();
-        }
-
-        int m_intUserSelectionKey = -1;
         private void RefreshFilter()
         {
             string strFilter = "";
@@ -434,55 +437,17 @@ namespace LogViewer
             lblMemory.Text = "Used Ram: " + ((double)Process.GetCurrentProcess().WorkingSet64 / 1000000d).ToString(".00") + " MB";
         }
 
-        private void txtFilter_TextChanged(object sender, EventArgs e)
-        {
-            if (txtFilter.Text.Trim() == "")
-                m_strTextFilter = "";
-            else
-            {
-                m_strTextFilter = "ErrorInfo Like '%" + txtFilter.Text.Replace("'", "''") + "%' OR Info Like '%" + txtFilter.Text.Replace("'", "''") + "%'";
-            }
-            RefreshFilter();
-        }
-
-        private void dtpFrom_ValueChanged(object sender, EventArgs e)
-        {
-            m_strDateFilter = "EntryTime >= '" + dtpFrom.Value.ToString("dd/MM/yyyy HH:mm:ss.00") + "'";
-            if (m_strDateFilter != "")
-            {
-                m_strDateFilter += "AND EntryTime <= '" + dtpTo.Value.ToString("dd/MM/yyyy HH:mm:ss.00") + "'";
-            }
-            RefreshFilter();
-        }
-
-        private void dtpTo_ValueChanged(object sender, EventArgs e)
-        {
-            m_strDateFilter = "EntryTime >= '" + dtpFrom.Value.ToString("dd/MM/yyyy HH:mm:ss.00") + "'";
-            if (m_strDateFilter != "")
-            {
-                m_strDateFilter += "AND EntryTime <= '" + dtpTo.Value.ToString("dd/MM/yyyy HH:mm:ss.00") + "'";
-            }
-            RefreshFilter();
-
-        }
-
-        private void txtUser_TextChanged(object sender, EventArgs e)
-        {
-            if (txtUser.Text.Trim() == "")
-                m_strUserFilter = "";
-            else
-            {
-                m_strUserFilter = "UserName Like '%" + txtUser.Text.Replace("'", "''") + "%'";
-            }
-            RefreshFilter();
-        }
-
         public bool AddFile(string file)
         {
             if (file.Trim() == "")
                 return true;
 
-            if (timer1.Enabled == false)
+            bool blnLiveListen = false;
+            string strLiveListen = ConfigurationManager.AppSettings["LiveListeningOnByDefault"];
+            if (strLiveListen != null && strLiveListen.Equals("true", StringComparison.InvariantCultureIgnoreCase))
+                blnLiveListen = true;
+
+            if (timer1.Enabled == false && blnLiveListen)
             {
                 timer1.Enabled = true;
                 timer1.Start();
@@ -501,6 +466,10 @@ namespace LogViewer
             {
 
                 //if this is the firs file - we need to select a behavior for parsing the logs and formatting gridCols
+                int intNumLines = 50;
+                string linesForDetection = ConfigurationManager.AppSettings["NumLogLinesForAutoDetect"];
+                if (linesForDetection == null || !int.TryParse(linesForDetection, out intNumLines))
+                    intNumLines = 50;
 
                 if (m_objChosenBehavior == null)
                 {
@@ -509,7 +478,7 @@ namespace LogViewer
                     using (StreamReader sr = new StreamReader(fs))
                     {
                         //get the first lines of the file
-                        for (int i = 0; i < 50; i++)
+                        for (int i = 0; i < intNumLines; i++)
                         {
                             string line = sr.ReadLine();
                             if (line == null)
@@ -581,7 +550,7 @@ namespace LogViewer
             return true;
         }
 
-        void OpenNotepad(string p_strLogFileName)
+        private void OpenNotepad(string p_strLogFileName)
         {
             //only open a file in notepad if it's a new file causing the problem...
 
@@ -590,58 +559,6 @@ namespace LogViewer
             string strWinDir = Environment.GetEnvironmentVariable("SystemRoot");
             Process.Start(strWinDir + "\\notepad.exe", p_strLogFileName);
             //this.Visible = false;
-        }
-
-        /// <summary>
-        /// timer controls log files refresh
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            List<string> list = new List<string>();
-            list.AddRange(m_colWatchedFiles.Keys);
-            foreach (string file in list)
-            {
-                long lngPrevLength = m_colWatchedFiles[file];
-
-                if (File.Exists(file))
-                {
-                    long lngFileLength = (long)new FileInfo(file).Length;
-
-                    //file was swapped, and a new file was created => smaller filesize
-                    if (lngPrevLength > lngFileLength)
-                    {
-                        //we will adjust our counters to keep track with the file.
-                        //(the following code will take care of the rest as ususal)
-                        m_colWatchedFiles[file] = 0;
-                        lngPrevLength = 0;
-                    }
-
-                    //file changed (more entries were added)
-                    if (lngPrevLength < lngFileLength)
-                    {
-                        long lngNewLength = ParseLogFileRegExp(file, lngPrevLength);
-                        m_colWatchedFiles[file] = lngNewLength;
-
-                        if (!chkPinTrack.Checked && dataGridView1.Rows.Count > 0)
-                            dataGridView1.FirstDisplayedCell = dataGridView1.Rows[0].Cells[0];
-                    }
-                }
-            }
-            lblCount.Text = "Total Count: " + m_dvMainView.Count;
-            lblMemory.Text = "Used Ram: " + ((double)Process.GetCurrentProcess().WorkingSet64 / 1000000d).ToString(".00") + " MB";
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            if (txtThread.Text.Trim() == "")
-                m_strThreadFilter = "";
-            else
-            {
-                m_strThreadFilter = "ThreadName Like '%" + txtThread.Text.Replace("'", "''") + "%'";
-            }
-            RefreshFilter();
         }
 
         private void SetLogFileAssociaction()
@@ -678,7 +595,7 @@ namespace LogViewer
             Process.Start(FindRegeditPath(), "/s \"" + strFilePath + "\"").WaitForExit();
         }
 
-        string FindRegeditPath()
+        private string FindRegeditPath()
         {
             string strSystemDir = Environment.GetEnvironmentVariable("SystemRoot");
             string strFilePath = strSystemDir + @"\system32\regedt32.exe";
@@ -694,36 +611,6 @@ namespace LogViewer
                 return strFilePath;
 
             return null;
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-        }
-
-        private void associateWithlogFilesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetLogFileAssociaction();
-        }
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
-        private void dataGridView1_DragDrop(object sender, DragEventArgs e)
-        {
-            FilesDropped(e);
-        }
-
-        private void MainForm_DragDrop(object sender, DragEventArgs e)
-        {
-            FilesDropped(e);
-        }
-
-        private void lstFiles_DragDrop(object sender, DragEventArgs e)
-        {
-            FilesDropped(e);
-
         }
 
         private void FilesDropped(DragEventArgs e)
@@ -760,154 +647,12 @@ namespace LogViewer
             else e.Effect = DragDropEffects.None;
         }
 
-        private void MainForm_DragEnter(object sender, DragEventArgs e)
-        {
-            HandleDragEnter(e);
-        }
-
-        private void lstFiles_DragEnter(object sender, DragEventArgs e)
-        {
-            HandleDragEnter(e);
-        }
-
-        private void dataGridView1_DragEnter(object sender, DragEventArgs e)
-        {
-            HandleDragEnter(e);
-        }
-
-        private void clearAllFilesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            m_colWatchedFiles.Clear();
-            lstFiles.Items.Clear();
-        }
-
-        private void clearEntriesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            m_dtlogEntries.Clear();
-        }
-
-        private void stopLiveListeningToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            timer1.Stop();
-        }
-
-        private void startLiveListeningToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            timer1.Start();
-        }
-
-        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            //save selected row's key
-            DSLogData.LogEntriesRow drRow = null;
-            if (dataGridView1.SelectedRows.Count > 0)
-            {
-                drRow = (DSLogData.LogEntriesRow)(((DataRowView)dataGridView1.SelectedRows[0].DataBoundItem).Row);
-                m_intUserSelectionKey = drRow.Key;
-            }
-        }
-
-        //string m_strServerScriptFile = null;
-        PreFilterCard m_frmBatchCollector = new PreFilterCard();
-        private void loadServerListToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (m_frmBatchCollector.ShowDialog() == DialogResult.OK)
-            {
-
-                if (m_frmBatchCollector.LogDirectories.Count == 0)
-                {
-                    m_objGlobalLineFilter = m_frmBatchCollector.CardsLineFilter;
-                }
-
-                foreach (string directory in m_frmBatchCollector.LogDirectories)
-                    ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
-
-                //perform a memory collection
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-            }
-        }
-
         private void LoadServerListFile(string file)
         {
-            //List<string> colExcludeList = new List<string>();
-            //List<string> colIncludeList = new List<string>();
-            //List<string> colLogDirectories = new List<string>();
-            //m_colNumMaskedColumns = new List<string>();
-            //WildCards cardsLineFilter = null;
-            //int intHistory = NUM_LATEST_FILES_TO_COLLECT;
-
+            
             if (File.Exists(file))
             {
-                //m_strServerScriptFile = file;
-                ////each line in file should hold a log directory in a server e.g.: "\\inttiradev1\c$\log\" 
-                //string[] lines = File.ReadAllLines(file);
-                //foreach (string line in lines)
-                //{
-                //    if (String.IsNullOrEmpty(line.Trim()))
-                //        continue;
-
-                //    //get all exclude lines and construct exclude list
-                //    if (line.Trim().ToLower().StartsWith("exclude:"))
-                //    {
-                //        string[] excludes = line.Trim().ToLower().Substring(9).Split(",;".ToCharArray());
-                //        colExcludeList.AddRange(excludes);
-                //        continue;
-                //    }
-
-                //    //let the user decide how many files back he wants
-                //    if (line.Trim().ToLower().StartsWith("history:"))
-                //    {
-                //        string strHistory = line.Trim().ToLower().Substring(9).Trim();
-                //        intHistory = NUM_LATEST_FILES_TO_COLLECT;
-                //        bool ok = int.TryParse(strHistory, out intHistory);
-                //        if (!ok)
-                //            intHistory = NUM_LATEST_FILES_TO_COLLECT;
-
-                //        continue;
-                //    }
-
-                //    //get all exclude lines and construct exclude list
-                //    if (line.Trim().ToLower().StartsWith("include:"))
-                //    {
-                //        string[] includes = line.Trim().ToLower().Substring(9).Split(",;".ToCharArray());
-                //        colIncludeList.AddRange(includes);
-                //        continue;
-                //    }
-
-                //    //get wildcards for line filtering
-                //    if (line.Trim().ToLower().StartsWith("linefilter:"))
-                //    {
-                //        string includes = line.Trim().Substring(11);
-                //        cardsLineFilter = new WildCards("*" + includes.Trim() + "*");
-                //        continue;
-                //    }
-
-                //    //get wildcards for line filtering
-                //    if (line.Trim().ToLower().StartsWith("numbermaskedcolumns:"))
-                //    {
-                //        string[] columns = line.Substring(20).ToLower().Trim().Split(",;".ToCharArray());
-                //        m_colNumMaskedColumns.AddRange(columns);
-                //        foreach (string col in m_colNumMaskedColumns)
-                //        {
-                //            string strColName = col.Substring(0, 1).ToUpper() + col.Substring(1) + "Numbers";
-                //            if (!m_dtlogEntries.Columns.Contains(strColName))
-                //                m_dtlogEntries.Columns.Add(strColName, typeof(string));
-                //        }
-                //        foreach (string col in m_colNumMaskedColumns)
-                //        {
-                //            string strColName = col.Substring(0, 1).ToUpper() + col.Substring(1) + "Numbers";
-                //            if (!m_objDummyTable.Columns.Contains(strColName))
-                //                m_objDummyTable.Columns.Add(strColName, typeof(string));
-                //        }
-                //        continue;
-                //    }
-
-                //    // a log directory line is the default line type
-                //    colLogDirectories.Add(line);
-                //}
-                // PreFilterCard card = new PreFilterCard();
+        
                 m_frmBatchCollector.LoadPreset(file);
                 //if the file doesn't contain server lines, use it as a global filter description file
                 if (m_frmBatchCollector.LogDirectories.Count == 0)
@@ -919,7 +664,6 @@ namespace LogViewer
                     ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
             }
         }
-
 
         private void ProcessLogDirectory(List<string> colExcludeList, List<string> colIncludeList, WildCards cardsLineFilter, int intHistory, string line)
         {
@@ -1028,84 +772,6 @@ namespace LogViewer
             m_dtlogEntries.AcceptChanges();
         }
 
-        private void removeFileToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RemoveFileEntriesFromDataSet((string)lstFiles.SelectedItem);
-            m_colWatchedFiles.Remove((string)lstFiles.SelectedItem);
-            lstFiles.Items.Remove(lstFiles.SelectedItem);
-        }
-
-        private void lstFiles_MouseDown(object sender, MouseEventArgs e)
-        {
-            int index = lstFiles.IndexFromPoint(e.Location);
-            lstFiles.SelectedIndex = index;
-        }
-
-        private void reloadLastServerListToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            m_dtlogEntries.Clear();
-            m_colWatchedFiles.Clear();
-            lstFiles.Items.Clear();
-            foreach (string directory in m_frmBatchCollector.LogDirectories)
-                ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
-
-            //perform a memory collection
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-        }
-
-        private void closeAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            m_dtlogEntries.Clear();
-            m_colWatchedFiles.Clear();
-            lstFiles.Items.Clear();
-            m_objChosenBehavior = null;
-        }
-
-        private void exportToCsvFileToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            //ask user for a filename
-            saveFileDialog1.AddExtension = true;
-            saveFileDialog1.DefaultExt = "csv";
-            DialogResult res = saveFileDialog1.ShowDialog();
-
-            //check that user chose a file
-            if (res == DialogResult.Cancel)
-                return;
-            string csvFileName = saveFileDialog1.FileName;
-            ExportToCsvFile(csvFileName);
-
-        }
-
-        Encoding m_objEncoding = Encoding.ASCII;
-        Encoding CurrentEncoding
-        {
-            get
-            {
-                if (m_objEncoding != Encoding.ASCII)
-                    return m_objEncoding;
-
-                string encName = System.Configuration.ConfigurationSettings.AppSettings["Encoding"];
-                try
-                {
-                    if (!string.IsNullOrEmpty(encName))
-                    {
-                        m_objEncoding = Encoding.GetEncoding(encName.Trim());
-                        return m_objEncoding;
-                    }
-                }
-                catch { }
-
-                CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
-                int codePage = cultureInfo.TextInfo.ANSICodePage;
-                m_objEncoding = codePage.Equals(0) ?
-                                        Encoding.UTF8 :
-                                        Encoding.GetEncoding(codePage);
-                return m_objEncoding;
-            }
-        }
-
         private void ExportToCsvFile(string csvFileName)
         {
 
@@ -1185,23 +851,34 @@ namespace LogViewer
                 MessageBox.Show("a little problem sir.." + ex.Message + ex.StackTrace);
             }
         }
+
+#region eventHandlers
+
+        private void loadServerListToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (m_frmBatchCollector.ShowDialog() == DialogResult.OK)
+            {
+
+                if (m_frmBatchCollector.LogDirectories.Count == 0)
+                {
+                    m_objGlobalLineFilter = m_frmBatchCollector.CardsLineFilter;
+                }
+
+                foreach (string directory in m_frmBatchCollector.LogDirectories)
+                    ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
+
+                //perform a memory collection
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            }
+        }
+
         private void gCCollectToolStripMenuItem_Click(object sender, EventArgs e)
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
-        }
-
-        private void dataGridView1_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)32 || e.KeyChar == '\r')
-            {
-                if (dataGridView1.SelectedRows.Count > 0)
-                {
-                    int intSelectionIndex = dataGridView1.SelectedRows[0].Index;
-                    ShowLineCard(intSelectionIndex);
-                }
-            }
         }
 
         private void generateCsvReportToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1319,5 +996,262 @@ namespace LogViewer
                 AddLogFiles(new string[] { file });
             }
         }
+
+        private void dataGridView1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)32 || e.KeyChar == '\r')
+            {
+                if (dataGridView1.SelectedRows.Count > 0)
+                {
+                    int intSelectionIndex = dataGridView1.SelectedRows[0].Index;
+                    ShowLineCard(intSelectionIndex);
+                }
+            }
+        }
+
+        private void MainForm_DragEnter(object sender, DragEventArgs e)
+        {
+            HandleDragEnter(e);
+        }
+
+        private void lstFiles_DragEnter(object sender, DragEventArgs e)
+        {
+            HandleDragEnter(e);
+        }
+
+        private void dataGridView1_DragEnter(object sender, DragEventArgs e)
+        {
+            HandleDragEnter(e);
+        }
+
+        private void clearAllFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_colWatchedFiles.Clear();
+            lstFiles.Items.Clear();
+        }
+
+        private void clearEntriesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_dtlogEntries.Clear();
+        }
+
+        private void stopLiveListeningToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            timer1.Stop();
+        }
+
+        private void startLiveListeningToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            timer1.Start();
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //save selected row's key
+            DSLogData.LogEntriesRow drRow = null;
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                drRow = (DSLogData.LogEntriesRow)(((DataRowView)dataGridView1.SelectedRows[0].DataBoundItem).Row);
+                m_intUserSelectionKey = drRow.Key;
+            }
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+        }
+
+        private void associateWithlogFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SetLogFileAssociaction();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_DragDrop(object sender, DragEventArgs e)
+        {
+            FilesDropped(e);
+        }
+
+        private void MainForm_DragDrop(object sender, DragEventArgs e)
+        {
+            FilesDropped(e);
+        }
+
+        private void lstFiles_DragDrop(object sender, DragEventArgs e)
+        {
+            FilesDropped(e);
+
+        }
+
+        private void txtFilter_TextChanged(object sender, EventArgs e)
+        {
+            if (txtFilter.Text.Trim() == "")
+                m_strTextFilter = "";
+            else
+            {
+                m_strTextFilter = "ErrorInfo Like '%" + txtFilter.Text.Replace("'", "''") + "%' OR Info Like '%" + txtFilter.Text.Replace("'", "''") + "%'";
+            }
+            RefreshFilter();
+        }
+
+        private void dtpFrom_ValueChanged(object sender, EventArgs e)
+        {
+            m_strDateFilter = "EntryTime >= '" + dtpFrom.Value.ToString("dd/MM/yyyy HH:mm:ss.00") + "'";
+            if (m_strDateFilter != "")
+            {
+                m_strDateFilter += "AND EntryTime <= '" + dtpTo.Value.ToString("dd/MM/yyyy HH:mm:ss.00") + "'";
+            }
+            RefreshFilter();
+        }
+
+        private void dtpTo_ValueChanged(object sender, EventArgs e)
+        {
+            m_strDateFilter = "EntryTime >= '" + dtpFrom.Value.ToString("dd/MM/yyyy HH:mm:ss.00") + "'";
+            if (m_strDateFilter != "")
+            {
+                m_strDateFilter += "AND EntryTime <= '" + dtpTo.Value.ToString("dd/MM/yyyy HH:mm:ss.00") + "'";
+            }
+            RefreshFilter();
+
+        }
+
+        private void txtUser_TextChanged(object sender, EventArgs e)
+        {
+            if (txtUser.Text.Trim() == "")
+                m_strUserFilter = "";
+            else
+            {
+                m_strUserFilter = "UserName Like '%" + txtUser.Text.Replace("'", "''") + "%'";
+            }
+            RefreshFilter();
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbLevel.Text == "ALL")
+            {
+                m_strLevelFilter = "";
+            }
+            else
+            {
+                m_strLevelFilter = "LogLevel = '" + cmbLevel.Text + "'";
+            }
+            RefreshFilter();
+        }
+
+        private void removeFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RemoveFileEntriesFromDataSet((string)lstFiles.SelectedItem);
+            m_colWatchedFiles.Remove((string)lstFiles.SelectedItem);
+            lstFiles.Items.Remove(lstFiles.SelectedItem);
+        }
+
+        private void lstFiles_MouseDown(object sender, MouseEventArgs e)
+        {
+            int index = lstFiles.IndexFromPoint(e.Location);
+            lstFiles.SelectedIndex = index;
+        }
+
+        private void reloadLastServerListToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_dtlogEntries.Clear();
+            m_colWatchedFiles.Clear();
+            lstFiles.Items.Clear();
+            foreach (string directory in m_frmBatchCollector.LogDirectories)
+                ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
+
+            //perform a memory collection
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
+
+        private void closeAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            m_dtlogEntries.Clear();
+            m_colWatchedFiles.Clear();
+            lstFiles.Items.Clear();
+            m_objChosenBehavior = null;
+        }
+
+        private void exportToCsvFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //ask user for a filename
+            saveFileDialog1.AddExtension = true;
+            saveFileDialog1.DefaultExt = "csv";
+            DialogResult res = saveFileDialog1.ShowDialog();
+
+            //check that user chose a file
+            if (res == DialogResult.Cancel)
+                return;
+            string csvFileName = saveFileDialog1.FileName;
+            ExportToCsvFile(csvFileName);
+
+        }
+
+        /// <summary>
+        /// timer controls log files refresh
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            List<string> list = new List<string>();
+            list.AddRange(m_colWatchedFiles.Keys);
+            foreach (string file in list)
+            {
+                long lngPrevLength = m_colWatchedFiles[file];
+
+                if (File.Exists(file))
+                {
+                    long lngFileLength = (long)new FileInfo(file).Length;
+
+                    //file was swapped, and a new file was created => smaller filesize
+                    if (lngPrevLength > lngFileLength)
+                    {
+                        //we will adjust our counters to keep track with the file.
+                        //(the following code will take care of the rest as ususal)
+                        m_colWatchedFiles[file] = 0;
+                        lngPrevLength = 0;
+                    }
+
+                    //file changed (more entries were added)
+                    if (lngPrevLength < lngFileLength)
+                    {
+                        long lngNewLength = ParseLogFileRegExp(file, lngPrevLength);
+                        m_colWatchedFiles[file] = lngNewLength;
+
+                        if (!chkPinTrack.Checked && dataGridView1.Rows.Count > 0)
+                            dataGridView1.FirstDisplayedCell = dataGridView1.Rows[0].Cells[0];
+                    }
+                }
+            }
+            lblCount.Text = "Total Count: " + m_dvMainView.Count;
+            lblMemory.Text = "Used Ram: " + ((double)Process.GetCurrentProcess().WorkingSet64 / 1000000d).ToString(".00") + " MB";
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (txtThread.Text.Trim() == "")
+                m_strThreadFilter = "";
+            else
+            {
+                m_strThreadFilter = "ThreadName Like '%" + txtThread.Text.Replace("'", "''") + "%'";
+            }
+            RefreshFilter();
+        }
+
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            int intRowIndex = e.RowIndex;
+            //don't distrupt header operations
+            ShowLineCard(intRowIndex);
+
+        }
+#endregion
+
     }
 }
