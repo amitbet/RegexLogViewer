@@ -25,5 +25,10 @@ namespace LogViewer
         {
             label1.Text = text;
         }
+
+        internal void SetTotalProgressSteps(int intProgressSteps)
+        {
+            progressBar1.Maximum = intProgressSteps;
+        }
     }
 }

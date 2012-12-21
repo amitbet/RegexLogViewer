@@ -11,6 +11,7 @@ namespace LogViewer
     public static class ProgressBarManager
     {
         static long m_intFullProgressBarValue = 100;
+        static int m_intProgressSteps = 100;
         static long m_intIntermediateValue = 0;
         static FrmProgressBar m_frm = null;
         static int m_intPrevValue = 0;
@@ -20,6 +21,7 @@ namespace LogViewer
         {
             m_frm = new FrmProgressBar();
             m_frm.SetLableText(m_labelText);
+            m_frm.SetTotalProgressSteps(m_intProgressSteps);
             Thread t = new Thread((ThreadStart)delegate
             {
                 Application.Run(m_frm);
@@ -27,7 +29,8 @@ namespace LogViewer
             t.SetApartmentState(ApartmentState.STA);
             t.IsBackground = true;
             t.Start();
-            Thread.Sleep(1000);
+            while (m_frm.Visible == false)
+                Thread.Sleep(50);
         }
 
         public static void ShowProgressBar(long intFullProgressBarValue)
@@ -65,11 +68,12 @@ namespace LogViewer
                 }
             }
         }
+
         public static void SetProgress(long intermediateValue)
         {
-            int newValue = (int)(((double)intermediateValue / (double)m_intFullProgressBarValue) * 100);
-            if (newValue > 100)
-                newValue = 100;
+            int newValue = (int)(((double)intermediateValue / (double)m_intFullProgressBarValue) * (double)m_intProgressSteps);
+            if (newValue > m_intProgressSteps)
+                newValue = m_intProgressSteps;
 
             m_intIntermediateValue = intermediateValue;
             if (newValue > m_intPrevValue && m_frm!=null)
@@ -110,11 +114,16 @@ namespace LogViewer
 
         public static void CloseProgress()
         {
-            m_frm.Invoke((ThreadStart)delegate
+            Thread t = new Thread((ThreadStart)delegate
             {
-                m_frm.Hide();
+                Thread.Sleep(700);
+                m_frm.Invoke((ThreadStart)delegate
+                {
+                    m_frm.Hide();
+                });
+                ClearProgress();
             });
-            ClearProgress();
+            t.Start();
         }
     }
 }

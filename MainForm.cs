@@ -637,6 +637,7 @@ namespace LogViewer
             {
                 AddFile(file);
             }
+            
             ProgressBarManager.CloseProgress();
             if (m_colWatchedFiles.Count == 0) Application.Exit();
         }

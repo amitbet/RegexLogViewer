@@ -35,6 +35,7 @@ namespace LogViewer
         }
 
         HashSet<string> m_colGridCols = new HashSet<string>();
+        [XmlIgnore]
         public HashSet<string> GridCols
         {
             get
@@ -118,8 +119,9 @@ namespace LogViewer
             }
             set
             {
-                m_regParserPattern = value.Value;
+                m_regParserPattern = value.Value.Trim(" \n\r".ToCharArray());
                 m_regParser = new Regex(m_regParserPattern, m_enmParserOptions);
+                FillColumnsFromRegexPattern(m_regParserPattern);
             }
         }
 
