@@ -648,28 +648,9 @@ namespace LogViewer
             else e.Effect = DragDropEffects.None;
         }
 
-        private void LoadServerListFile(string file)
-        {
-            
-            if (File.Exists(file))
-            {
-        
-                m_frmBatchCollector.LoadPreset(file);
-                //if the file doesn't contain server lines, use it as a global filter description file
-                if (m_frmBatchCollector.LogDirectories.Count == 0)
-                {
-                    m_objGlobalLineFilter = m_frmBatchCollector.CardsLineFilter;
-                }
-
-                foreach (string directory in m_frmBatchCollector.LogDirectories)
-                    ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
-            }
-        }
-
         private void ProcessLogDirectory(List<string> colExcludeList, List<string> colIncludeList, WildCards cardsLineFilter, int intHistory, string line)
         {
             Dictionary<string, DateTime> colFileTimes = new Dictionary<string, DateTime>();
-
 
             //get all files from server dir
             string dir = line.Trim();
@@ -748,10 +729,19 @@ namespace LogViewer
                         intTotalDirLogBytes += (new FileInfo(logFile)).Length;
                     }
                 }
-                ProgressBarManager.ShowProgressBar(intTotalDirLogBytes);
+                
+                ProgressBarManager.FullProgressBarValue = intTotalDirLogBytes;
                 ProgressBarManager.SetLableText("loading: " + dir);
                 colFilesForCollection.ForEach(f => AddFile(f));
-                ProgressBarManager.CloseProgress();
+                Thread.Sleep(200);
+                //Thread t = new Thread((ThreadStart)delegate
+                //{
+                //    Thread.Sleep(700);
+                //    ProgressBarManager.ClearProgress();
+                //});
+                //t.Start();
+                ProgressBarManager.ClearProgress();
+                //ProgressBarManager.CloseProgress();
             }
             catch (Exception ex)
             {
@@ -864,9 +854,10 @@ namespace LogViewer
                 {
                     m_objGlobalLineFilter = m_frmBatchCollector.CardsLineFilter;
                 }
-
+                ProgressBarManager.ShowProgressBar(100);
                 foreach (string directory in m_frmBatchCollector.LogDirectories)
                     ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
+                ProgressBarManager.CloseProgress();
 
                 //perform a memory collection
                 GC.Collect();
@@ -1161,9 +1152,10 @@ namespace LogViewer
             m_dtlogEntries.Clear();
             m_colWatchedFiles.Clear();
             lstFiles.Items.Clear();
+            ProgressBarManager.ShowProgressBar(100);
             foreach (string directory in m_frmBatchCollector.LogDirectories)
                 ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
-
+            ProgressBarManager.CloseProgress();
             //perform a memory collection
             GC.Collect();
             GC.WaitForPendingFinalizers();

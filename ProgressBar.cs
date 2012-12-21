@@ -11,6 +11,12 @@ namespace LogViewer
     public static class ProgressBarManager
     {
         static long m_intFullProgressBarValue = 100;
+
+        public static long FullProgressBarValue
+        {
+            get { return ProgressBarManager.m_intFullProgressBarValue; }
+            set { ProgressBarManager.m_intFullProgressBarValue = value; }
+        }
         static int m_intProgressSteps = 100;
         static long m_intIntermediateValue = 0;
         static FrmProgressBar m_frm = null;
@@ -43,8 +49,8 @@ namespace LogViewer
 
             m_frm.Invoke((ThreadStart)delegate
             {
-                
-                m_frm.Show();
+                if (!m_frm.Visible)
+                    m_frm.Show();
                 m_frm.ProgressBarControl.Value = 0;
             });
         }
