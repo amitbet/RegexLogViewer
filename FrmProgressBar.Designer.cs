@@ -62,6 +62,7 @@
             this.Name = "FrmProgressBar";
             this.ShowInTaskbar = false;
             this.Text = "Progress";
+            this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
 

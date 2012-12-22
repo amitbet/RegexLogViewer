@@ -30,5 +30,11 @@ namespace LogViewer
         {
             progressBar1.Maximum = intProgressSteps;
         }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            this.Hide();
+            e.Cancel = true;
+        }
     }
 }

@@ -41,11 +41,10 @@ namespace LogViewer
 
         public static void ShowProgressBar(long intFullProgressBarValue)
         {
-            if (m_frm ==null)
+            if (m_frm == null)
                 CreateInThread();
-            
+
             m_intFullProgressBarValue = intFullProgressBarValue;
-            
 
             m_frm.Invoke((ThreadStart)delegate
             {
@@ -54,7 +53,7 @@ namespace LogViewer
                 m_frm.ProgressBarControl.Value = 0;
             });
         }
-        
+
         static string m_labelText = "Adding Files";
         public static void SetLableText(string text)
         {
@@ -65,7 +64,7 @@ namespace LogViewer
                 {
                     m_frm.Invoke((ThreadStart)delegate
                     {
-                        m_frm.SetLableText(text);   
+                        m_frm.SetLableText(text);
                     });
                 }
                 else
@@ -82,7 +81,7 @@ namespace LogViewer
                 newValue = m_intProgressSteps;
 
             m_intIntermediateValue = intermediateValue;
-            if (newValue > m_intPrevValue && m_frm!=null)
+            if (newValue > m_intPrevValue && m_frm != null)
             {
                 if (m_frm.InvokeRequired)
                 {
@@ -123,10 +122,11 @@ namespace LogViewer
             Thread t = new Thread((ThreadStart)delegate
             {
                 Thread.Sleep(700);
-                m_frm.Invoke((ThreadStart)delegate
-                {
-                    m_frm.Hide();
-                });
+                if (m_frm.Visible)
+                    m_frm.Invoke((ThreadStart)delegate
+                    {
+                        m_frm.Hide();
+                    });
                 ClearProgress();
             });
             t.Start();
