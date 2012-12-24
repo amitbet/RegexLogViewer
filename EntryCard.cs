@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace LogViewer
 {
@@ -26,6 +27,8 @@ namespace LogViewer
         private void SetRowInForm()
         {
             DSLogData.LogEntriesRow row = (DSLogData.LogEntriesRow)m_ItemList[m_position];
+
+            
 
             txtComp.Text = row.ComputerName;
             txtExInfo.Text = row.ErrorInfo;

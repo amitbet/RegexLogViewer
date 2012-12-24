@@ -11,6 +11,8 @@ namespace LogViewer
         ErrorInfo,
         EntryTime,
         ThreadName,
+        UserName,
+        ComputerName,
         LogLevel, 
         Key, 
         SourceLogFile

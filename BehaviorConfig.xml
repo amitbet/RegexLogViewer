@@ -60,7 +60,7 @@
     <BehaviorName>Log4Net</BehaviorName>
     <Grade>0</Grade>
     <!--C# date format: http://msdn.microsoft.com/en-us/library/8kb3ddd4.aspx-->
-    <DateFormat>yyyy-MM-dd HH:mm:ss,fff</DateFormat>
+    <DateFormat>dd/MM HH:mm:ss,fff</DateFormat>
     <!--use: <date>,<thread>,<level>,<info>,<exinfo> as named groups in regex, this will identify the log line parts
     
         date = the date, which should be in the date format stated in the <DateFormat> tag.
@@ -69,8 +69,9 @@
         level = the log level.
         thread = the name/number of the thread
     -->
-    <ParserRegexPatternCData><![CDATA[
-    (?<date>\d{2}/\d{2} \d{2}:\d{2}:\d{2},\d{3})\s[\w.\s]*\[\s*(?<thread>[\w\d]*)\]\s*(?<level>\w{4,8})\s{1,5}[-\s]*\|\|(?<info>.*?)\n(?<exinfo>.*?)(?=\d{2}/\d{2}|\z)
+    <ParserRegexPatternCData>
+      <![CDATA[
+      (?<date>\d{2}/\d{2} \d{2}:\d{2}:\d{2},\d{3})\s[\w.\s]*\[\s*(?<thread>[\w\d]*)\]\s*(?<level>\w{4,8})\s{1,5}[-\s]*\|\|\s{1,4}(?<user>.{1,20}?)\s{1,4}\|\|\s{1,4}(?<machine>.{1,20}?)\s{1,4}\|\|\s{0,4}(?<info>.*?)\n(?<exinfo>.*?)(?=\d{2}/\d{2}|\z)
     ]]></ParserRegexPatternCData>
     <ParserRegexOptionsString>ignoreCase,Multiline,Compiled,Singleline</ParserRegexOptionsString>
   </LogBehavior>

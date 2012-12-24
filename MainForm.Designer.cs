@@ -123,7 +123,8 @@ namespace LogViewer
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
-            this.dataGridView1.Location = new System.Drawing.Point(13, 92);
+            this.dataGridView1.Location = new System.Drawing.Point(17, 113);
+            this.dataGridView1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
@@ -137,7 +138,7 @@ namespace LogViewer
             this.dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridView1.RowTemplate.Height = 19;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(657, 330);
+            this.dataGridView1.Size = new System.Drawing.Size(876, 406);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
             this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
@@ -210,53 +211,59 @@ namespace LogViewer
             "WARN",
             "INFO",
             "DEBUG"});
-            this.cmbLevel.Location = new System.Drawing.Point(52, 30);
+            this.cmbLevel.Location = new System.Drawing.Point(69, 37);
+            this.cmbLevel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.cmbLevel.Name = "cmbLevel";
-            this.cmbLevel.Size = new System.Drawing.Size(121, 21);
+            this.cmbLevel.Size = new System.Drawing.Size(160, 24);
             this.cmbLevel.TabIndex = 5;
             this.cmbLevel.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(15, 33);
+            this.label2.Location = new System.Drawing.Point(20, 41);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(36, 13);
+            this.label2.Size = new System.Drawing.Size(46, 17);
             this.label2.TabIndex = 6;
             this.label2.Text = "Level:";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(14, 61);
+            this.label3.Location = new System.Drawing.Point(19, 75);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(33, 13);
+            this.label3.Size = new System.Drawing.Size(44, 17);
             this.label3.TabIndex = 8;
             this.label3.Text = "From:";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(204, 61);
+            this.label4.Location = new System.Drawing.Point(272, 75);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(23, 13);
+            this.label4.Size = new System.Drawing.Size(29, 17);
             this.label4.TabIndex = 9;
             this.label4.Text = "To:";
             // 
             // txtFilter
             // 
-            this.txtFilter.Location = new System.Drawing.Point(257, 30);
+            this.txtFilter.Location = new System.Drawing.Point(343, 37);
+            this.txtFilter.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtFilter.Name = "txtFilter";
-            this.txtFilter.Size = new System.Drawing.Size(108, 20);
+            this.txtFilter.Size = new System.Drawing.Size(143, 22);
             this.txtFilter.TabIndex = 10;
             this.txtFilter.TextChanged += new System.EventHandler(this.txtFilter_TextChanged);
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(179, 33);
+            this.label5.Location = new System.Drawing.Point(239, 41);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(77, 13);
+            this.label5.Size = new System.Drawing.Size(99, 17);
             this.label5.TabIndex = 11;
             this.label5.Text = "Including Text:";
             // 
@@ -264,9 +271,10 @@ namespace LogViewer
             // 
             this.dtpFrom.CustomFormat = "dd/MM/yyyy HH:mm:ss";
             this.dtpFrom.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpFrom.Location = new System.Drawing.Point(53, 57);
+            this.dtpFrom.Location = new System.Drawing.Point(71, 70);
+            this.dtpFrom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dtpFrom.Name = "dtpFrom";
-            this.dtpFrom.Size = new System.Drawing.Size(133, 20);
+            this.dtpFrom.Size = new System.Drawing.Size(176, 22);
             this.dtpFrom.TabIndex = 14;
             this.dtpFrom.ValueChanged += new System.EventHandler(this.dtpFrom_ValueChanged);
             // 
@@ -274,29 +282,30 @@ namespace LogViewer
             // 
             this.dtpTo.CustomFormat = "dd/MM/yyyy HH:mm:ss";
             this.dtpTo.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.dtpTo.Location = new System.Drawing.Point(233, 57);
+            this.dtpTo.Location = new System.Drawing.Point(311, 70);
+            this.dtpTo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.dtpTo.Name = "dtpTo";
-            this.dtpTo.Size = new System.Drawing.Size(132, 20);
+            this.dtpTo.Size = new System.Drawing.Size(175, 22);
             this.dtpTo.TabIndex = 15;
             this.dtpTo.ValueChanged += new System.EventHandler(this.dtpTo_ValueChanged);
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(368, 61);
+            this.label6.Location = new System.Drawing.Point(491, 75);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(32, 13);
+            this.label6.Size = new System.Drawing.Size(42, 17);
             this.label6.TabIndex = 17;
             this.label6.Text = "User:";
-            this.label6.Visible = false;
             // 
             // txtUser
             // 
-            this.txtUser.Location = new System.Drawing.Point(412, 58);
+            this.txtUser.Location = new System.Drawing.Point(549, 71);
+            this.txtUser.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtUser.Name = "txtUser";
-            this.txtUser.Size = new System.Drawing.Size(92, 20);
+            this.txtUser.Size = new System.Drawing.Size(121, 22);
             this.txtUser.TabIndex = 16;
-            this.txtUser.Visible = false;
             this.txtUser.TextChanged += new System.EventHandler(this.txtUser_TextChanged);
             // 
             // timer1
@@ -311,9 +320,11 @@ namespace LogViewer
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lstFiles.ContextMenuStrip = this.cmsFiles;
             this.lstFiles.FormattingEnabled = true;
-            this.lstFiles.Location = new System.Drawing.Point(541, 30);
+            this.lstFiles.ItemHeight = 16;
+            this.lstFiles.Location = new System.Drawing.Point(721, 37);
+            this.lstFiles.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.lstFiles.Name = "lstFiles";
-            this.lstFiles.Size = new System.Drawing.Size(129, 56);
+            this.lstFiles.Size = new System.Drawing.Size(171, 68);
             this.lstFiles.TabIndex = 19;
             this.lstFiles.DragDrop += new System.Windows.Forms.DragEventHandler(this.lstFiles_DragDrop);
             this.lstFiles.DragEnter += new System.Windows.Forms.DragEventHandler(this.lstFiles_DragEnter);
@@ -336,26 +347,29 @@ namespace LogViewer
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(510, 30);
+            this.label7.Location = new System.Drawing.Point(680, 37);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(31, 13);
+            this.label7.Size = new System.Drawing.Size(41, 17);
             this.label7.TabIndex = 20;
             this.label7.Text = "Files:";
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(368, 33);
+            this.label8.Location = new System.Drawing.Point(491, 41);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(44, 13);
+            this.label8.Size = new System.Drawing.Size(58, 17);
             this.label8.TabIndex = 22;
             this.label8.Text = "Thread:";
             // 
             // txtThread
             // 
-            this.txtThread.Location = new System.Drawing.Point(412, 30);
+            this.txtThread.Location = new System.Drawing.Point(549, 37);
+            this.txtThread.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.txtThread.Name = "txtThread";
-            this.txtThread.Size = new System.Drawing.Size(92, 20);
+            this.txtThread.Size = new System.Drawing.Size(121, 22);
             this.txtThread.TabIndex = 21;
             this.txtThread.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
@@ -367,7 +381,8 @@ namespace LogViewer
             this.cmbBehaviors});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(682, 27);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
+            this.menuStrip1.Size = new System.Drawing.Size(909, 32);
             this.menuStrip1.TabIndex = 23;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -382,55 +397,55 @@ namespace LogViewer
             this.generateCsvReportToolStripMenuItem,
             this.generateCvsReport3GramToolStripMenuItem});
             this.asdToolStripMenuItem.Name = "asdToolStripMenuItem";
-            this.asdToolStripMenuItem.Size = new System.Drawing.Size(37, 23);
+            this.asdToolStripMenuItem.Size = new System.Drawing.Size(44, 28);
             this.asdToolStripMenuItem.Text = "File";
             // 
             // addLogFileToolStripMenuItem
             // 
             this.addLogFileToolStripMenuItem.Name = "addLogFileToolStripMenuItem";
-            this.addLogFileToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.addLogFileToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
             this.addLogFileToolStripMenuItem.Text = "Add Log File";
             this.addLogFileToolStripMenuItem.Click += new System.EventHandler(this.addLogFileToolStripMenuItem_Click);
             // 
             // closeAllToolStripMenuItem
             // 
             this.closeAllToolStripMenuItem.Name = "closeAllToolStripMenuItem";
-            this.closeAllToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.closeAllToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
             this.closeAllToolStripMenuItem.Text = "Clear All";
             this.closeAllToolStripMenuItem.Click += new System.EventHandler(this.closeAllToolStripMenuItem_Click);
             // 
             // loadServerListToolStripMenuItem
             // 
             this.loadServerListToolStripMenuItem.Name = "loadServerListToolStripMenuItem";
-            this.loadServerListToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.loadServerListToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
             this.loadServerListToolStripMenuItem.Text = "Batch Collection";
             this.loadServerListToolStripMenuItem.Click += new System.EventHandler(this.loadServerListToolStripMenuItem_Click);
             // 
             // reloadLastServerListToolStripMenuItem
             // 
             this.reloadLastServerListToolStripMenuItem.Name = "reloadLastServerListToolStripMenuItem";
-            this.reloadLastServerListToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.reloadLastServerListToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
             this.reloadLastServerListToolStripMenuItem.Text = "Recollect batch";
             this.reloadLastServerListToolStripMenuItem.Click += new System.EventHandler(this.reloadLastServerListToolStripMenuItem_Click);
             // 
             // exportToSsvFileToolStripMenuItem
             // 
             this.exportToSsvFileToolStripMenuItem.Name = "exportToSsvFileToolStripMenuItem";
-            this.exportToSsvFileToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.exportToSsvFileToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
             this.exportToSsvFileToolStripMenuItem.Text = "Export gridview to csv file";
             this.exportToSsvFileToolStripMenuItem.Click += new System.EventHandler(this.exportToCsvFileToolStripMenuItem_Click);
             // 
             // generateCsvReportToolStripMenuItem
             // 
             this.generateCsvReportToolStripMenuItem.Name = "generateCsvReportToolStripMenuItem";
-            this.generateCsvReportToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.generateCsvReportToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
             this.generateCsvReportToolStripMenuItem.Text = "Generate csv report";
             this.generateCsvReportToolStripMenuItem.Click += new System.EventHandler(this.generateCsvReportToolStripMenuItem_Click);
             // 
             // generateCvsReport3GramToolStripMenuItem
             // 
             this.generateCvsReport3GramToolStripMenuItem.Name = "generateCvsReport3GramToolStripMenuItem";
-            this.generateCvsReport3GramToolStripMenuItem.Size = new System.Drawing.Size(222, 22);
+            this.generateCvsReport3GramToolStripMenuItem.Size = new System.Drawing.Size(265, 24);
             this.generateCvsReport3GramToolStripMenuItem.Text = "Generate cvs report (3Gram)";
             this.generateCvsReport3GramToolStripMenuItem.Click += new System.EventHandler(this.generateCvsReport3GramToolStripMenuItem_Click);
             // 
@@ -443,41 +458,41 @@ namespace LogViewer
             this.stopLiveListeningToolStripMenuItem,
             this.startLiveListeningToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 23);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(73, 28);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // associateWithlogFilesToolStripMenuItem
             // 
             this.associateWithlogFilesToolStripMenuItem.Name = "associateWithlogFilesToolStripMenuItem";
-            this.associateWithlogFilesToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.associateWithlogFilesToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
             this.associateWithlogFilesToolStripMenuItem.Text = "Associate with .log files";
             this.associateWithlogFilesToolStripMenuItem.Click += new System.EventHandler(this.associateWithlogFilesToolStripMenuItem_Click);
             // 
             // clearAllFilesToolStripMenuItem
             // 
             this.clearAllFilesToolStripMenuItem.Name = "clearAllFilesToolStripMenuItem";
-            this.clearAllFilesToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.clearAllFilesToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
             this.clearAllFilesToolStripMenuItem.Text = "Remove All Files";
             this.clearAllFilesToolStripMenuItem.Click += new System.EventHandler(this.clearAllFilesToolStripMenuItem_Click);
             // 
             // clearEntriesToolStripMenuItem
             // 
             this.clearEntriesToolStripMenuItem.Name = "clearEntriesToolStripMenuItem";
-            this.clearEntriesToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.clearEntriesToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
             this.clearEntriesToolStripMenuItem.Text = "Clear Entries";
             this.clearEntriesToolStripMenuItem.Click += new System.EventHandler(this.clearEntriesToolStripMenuItem_Click);
             // 
             // stopLiveListeningToolStripMenuItem
             // 
             this.stopLiveListeningToolStripMenuItem.Name = "stopLiveListeningToolStripMenuItem";
-            this.stopLiveListeningToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.stopLiveListeningToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
             this.stopLiveListeningToolStripMenuItem.Text = "Stop Live Listening";
             this.stopLiveListeningToolStripMenuItem.Click += new System.EventHandler(this.stopLiveListeningToolStripMenuItem_Click);
             // 
             // startLiveListeningToolStripMenuItem
             // 
             this.startLiveListeningToolStripMenuItem.Name = "startLiveListeningToolStripMenuItem";
-            this.startLiveListeningToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.startLiveListeningToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
             this.startLiveListeningToolStripMenuItem.Text = "Start Live Listening";
             this.startLiveListeningToolStripMenuItem.Click += new System.EventHandler(this.startLiveListeningToolStripMenuItem_Click);
             // 
@@ -486,16 +501,17 @@ namespace LogViewer
             this.cmbBehaviors.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.cmbBehaviors.Margin = new System.Windows.Forms.Padding(1, 0, 18, 0);
             this.cmbBehaviors.Name = "cmbBehaviors";
-            this.cmbBehaviors.Size = new System.Drawing.Size(92, 23);
+            this.cmbBehaviors.Size = new System.Drawing.Size(121, 28);
             this.cmbBehaviors.SelectedIndexChanged += new System.EventHandler(this.cmbBehaviors_SelectedIndexChanged);
             // 
             // chkPinTrack
             // 
             this.chkPinTrack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkPinTrack.AutoSize = true;
-            this.chkPinTrack.Location = new System.Drawing.Point(13, 428);
+            this.chkPinTrack.Location = new System.Drawing.Point(17, 527);
+            this.chkPinTrack.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.chkPinTrack.Name = "chkPinTrack";
-            this.chkPinTrack.Size = new System.Drawing.Size(159, 17);
+            this.chkPinTrack.Size = new System.Drawing.Size(201, 21);
             this.chkPinTrack.TabIndex = 24;
             this.chkPinTrack.Text = "Keep Selected Row In View";
             this.chkPinTrack.UseVisualStyleBackColor = true;
@@ -503,9 +519,10 @@ namespace LogViewer
             // lblCount
             // 
             this.lblCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblCount.Location = new System.Drawing.Point(513, 425);
+            this.lblCount.Location = new System.Drawing.Point(684, 523);
+            this.lblCount.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCount.Name = "lblCount";
-            this.lblCount.Size = new System.Drawing.Size(157, 20);
+            this.lblCount.Size = new System.Drawing.Size(209, 25);
             this.lblCount.TabIndex = 25;
             this.lblCount.Text = "Total Count: 0";
             this.lblCount.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -513,9 +530,10 @@ namespace LogViewer
             // lblMemory
             // 
             this.lblMemory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblMemory.Location = new System.Drawing.Point(356, 425);
+            this.lblMemory.Location = new System.Drawing.Point(475, 523);
+            this.lblMemory.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblMemory.Name = "lblMemory";
-            this.lblMemory.Size = new System.Drawing.Size(148, 20);
+            this.lblMemory.Size = new System.Drawing.Size(197, 25);
             this.lblMemory.TabIndex = 26;
             this.lblMemory.Text = "Used Ram: 11MB";
             this.lblMemory.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -523,9 +541,9 @@ namespace LogViewer
             // MainForm
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(682, 447);
+            this.ClientSize = new System.Drawing.Size(909, 550);
             this.Controls.Add(this.lblMemory);
             this.Controls.Add(this.lblCount);
             this.Controls.Add(this.chkPinTrack);
@@ -547,6 +565,7 @@ namespace LogViewer
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainForm";
             this.Text = "Regex LogViewer";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;

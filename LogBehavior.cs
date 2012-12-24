@@ -15,14 +15,18 @@ namespace LogViewer
     {
         Dictionary<string, LogGridColDefinition> m_colDefaultColumns = new Dictionary<string, LogGridColDefinition>();
 
+        //public static string DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss,fff";
+
         public LogBehavior()
         {
             m_colDefaultColumns.Add("key", new LogGridColDefinition { Header = "No.", Name = "EntryNumber", LogViewerDataMemberName = LogViwerDataFieldName.Key });
+            m_colDefaultColumns.Add("date", new LogGridColDefinition { Header = "EntryTime", Name = "EntryTime", LogViewerDataMemberName = LogViwerDataFieldName.EntryTime });
             m_colDefaultColumns.Add("level", new LogGridColDefinition { Header = "Level", Name = "Level", LogViewerDataMemberName = LogViwerDataFieldName.LogLevel });
             m_colDefaultColumns.Add("info", new LogGridColDefinition { Header = "Info", Name = "Info", LogViewerDataMemberName = LogViwerDataFieldName.Info });
             m_colDefaultColumns.Add("exinfo", new LogGridColDefinition { Header = "ExInfo", Name = "ExInfo", LogViewerDataMemberName = LogViwerDataFieldName.ErrorInfo });
-            m_colDefaultColumns.Add("date", new LogGridColDefinition { Header = "EntryTime", Name = "EntryTime", LogViewerDataMemberName = LogViwerDataFieldName.EntryTime });
             m_colDefaultColumns.Add("thread", new LogGridColDefinition { Header = "ThreadName", Name = "ThreadName", LogViewerDataMemberName = LogViwerDataFieldName.ThreadName });
+            m_colDefaultColumns.Add("user", new LogGridColDefinition { Header = "User", Name = "User", LogViewerDataMemberName = LogViwerDataFieldName.UserName });
+            m_colDefaultColumns.Add("machine", new LogGridColDefinition { Header = "Machine", Name = "Machine", LogViewerDataMemberName = LogViwerDataFieldName.ComputerName });
             m_colDefaultColumns.Add("sourcefile", new LogGridColDefinition { Header = "SourceLogFile", Name = "SourceLogFile", LogViewerDataMemberName = LogViwerDataFieldName.SourceLogFile });
         }
 
@@ -194,13 +198,20 @@ namespace LogViewer
             colColumnDefinitions.Add(m_colDefaultColumns["key"]);
 
             //find matches
-            foreach (string group in GridCols)
+            foreach (string group in m_colDefaultColumns.Keys)
             {
-                if (m_colDefaultColumns.ContainsKey(group.ToLower()))
+                if (GridCols.Contains(group.ToLower()))
                 {
                     colColumnDefinitions.Add(m_colDefaultColumns[group.ToLower()]);
                 }
             }
+            //foreach (string group in GridCols)
+            //{
+            //    if (m_colDefaultColumns.ContainsKey(group.ToLower()))
+            //    {
+            //        colColumnDefinitions.Add(m_colDefaultColumns[group.ToLower()]);
+            //    }
+            //}
 
             colColumnDefinitions.Add(m_colDefaultColumns["sourcefile"]);
 
@@ -219,6 +230,11 @@ namespace LogViewer
                     col.HeaderText = def.Header;
                     col.Name = def.Name;
                     col.ReadOnly = true;
+
+                    //if this is the dateTime column, format it accordingly
+                    if (def.LogViewerDataMemberName == LogViwerDataFieldName.EntryTime)
+                        col.DefaultCellStyle.Format = MainForm.DATE_TIME_FORMAT;
+
                     dataGridView.Columns.Add(col);
                 }
             };

@@ -84,6 +84,10 @@ namespace LogViewer
 
         public MainForm()
         {
+            string strDateTimeFormat = ConfigurationManager.AppSettings["GridDateTimeFormat"];
+            if (strDateTimeFormat != null)
+                DATE_TIME_FORMAT = strDateTimeFormat;
+
             if (File.Exists(m_strBehaviorConfigFileName))
             {
                 LoadBehaviorConfig();
@@ -286,6 +290,8 @@ namespace LogViewer
                             string strUser = match.Groups["user"].Value;
                             string strInfo = match.Groups["info"].Value;
                             string strInfoEx = match.Groups["exinfo"].Value.TrimEnd();
+                            string strMachine = match.Groups["machine"].Value;
+
                             DSLogData.LogEntriesRow row = m_objDummyTable.NewLogEntriesRow();
                             drRow.ErrorInfo = strInfoEx;
                             //"14/11 16:39:03,236"
@@ -315,7 +321,8 @@ namespace LogViewer
                             drRow.Info = strInfo;
                             drRow.LogLevel = strLevel;
                             drRow.SourceLogFile = Path.GetFileName(p_strLogFileName);
-
+                            drRow.UserName = strUser;
+                            drRow.ComputerName = strMachine;
                             if (p_strLogFileName.StartsWith("\\\\"))
                             {
                                 drRow.ServerName = p_strLogFileName.Substring(2, p_strLogFileName.IndexOf('\\', 3) - 2);
@@ -454,11 +461,11 @@ namespace LogViewer
             }
 
             dataGridView1.DataSource = m_dvMainView;
-            if (dataGridView1.Columns.Contains("EntryTime"))
-            {
-                dataGridView1.Columns["EntryTime"].DefaultCellStyle.Format = DATE_TIME_FORMAT;
-                dataGridView1.Columns["EntryTime"].Width = 134;
-            }
+            //if (dataGridView1.Columns.Contains("EntryTime"))
+            //{
+            //    dataGridView1.Columns["EntryTime"].DefaultCellStyle.Format = DATE_TIME_FORMAT;
+            //    dataGridView1.Columns["EntryTime"].Width = 134;
+            //}
             //string dir = Path.GetDirectoryName(file);
             //FileAttributes att = File.GetAttributes(file);
 
