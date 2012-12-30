@@ -28,14 +28,6 @@ namespace LogViewer
             {
                 Application.Run(f1);
             }
-            //else
-            //{
-            //    for (int i = 0; i < 15; ++i)
-            //    {
-            //        Thread.Sleep(500);
-            //        Application.DoEvents();
-            //    }
-            //}
         }
     }
 }

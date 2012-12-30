@@ -71,7 +71,7 @@ namespace LogViewer
             {
                 m_regParserPattern = value.ToString();
                 m_enmParserOptions = value.Options;
-                //FillRegexFlagsString(value.Options);
+
                 FillColumnsFromRegexPattern(m_regParserPattern);
                 m_regParser = new Regex(m_regParserPattern, m_enmParserOptions);
             }
@@ -205,13 +205,6 @@ namespace LogViewer
                     colColumnDefinitions.Add(m_colDefaultColumns[group.ToLower()]);
                 }
             }
-            //foreach (string group in GridCols)
-            //{
-            //    if (m_colDefaultColumns.ContainsKey(group.ToLower()))
-            //    {
-            //        colColumnDefinitions.Add(m_colDefaultColumns[group.ToLower()]);
-            //    }
-            //}
 
             colColumnDefinitions.Add(m_colDefaultColumns["sourcefile"]);
 

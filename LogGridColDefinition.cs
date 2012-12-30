@@ -37,27 +37,12 @@ namespace LogViewer
         }
         
         /// <summary>
-        /// Info,ErrorInfo,EntryTime,ThreadName,LogLevel,Key,SourceLogFile
+        /// Info,ErrorInfo,EntryTime,ThreadName,LogLevel,Key,SourceLogFile,UserName,ComputerName
         /// </summary>
         public LogViwerDataFieldName LogViewerDataMemberName
         {
             get { return m_enmLogViewerDataMemberName; }
             set { m_enmLogViewerDataMemberName = value; }
         }
-      
-
-        //LogColumnType m_enmColType = LogColumnType.String;
-        //public LogColumnType ColumnType
-        //{
-        //    get { return m_enmColType; }
-        //    set { m_enmColType = value; }
-        //}
-
-        //string m_strRegexGroupName = "";
-        //public string RegexGroupName
-        //{
-        //    get { return m_strRegexGroupName; }
-        //    set { m_strRegexGroupName = value; }
-        //}
     }
 }
