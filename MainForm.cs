@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
+using System.Linq;
 using System.Collections;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -46,6 +47,7 @@ namespace LogViewer
         private string m_strBehaviorConfigFileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "BehaviorConfig.xml");
         private int m_intUserSelectionKey = -1;
         PreFilterCard m_frmBatchCollector = new PreFilterCard();
+        private Dictionary<string, LogBehavior> m_behaviorsForFiles = new Dictionary<string, LogBehavior>();
         Encoding m_objEncoding = Encoding.ASCII;
         Encoding CurrentEncoding
         {
@@ -88,6 +90,8 @@ namespace LogViewer
             if (strDateTimeFormat != null)
                 DATE_TIME_FORMAT = strDateTimeFormat;
 
+
+
             if (File.Exists(m_strBehaviorConfigFileName))
             {
                 LoadBehaviorConfig();
@@ -111,6 +115,7 @@ namespace LogViewer
                         })
                 });
             }
+            m_colBehaviors.Add(LogBehavior.AutoDetectBehaviour);
 
             try
             {
@@ -120,12 +125,13 @@ namespace LogViewer
                 {
                     cmbBehaviors.Items.Add(b);
                 }
-
+                
                 CreateDummyTable();
                 m_dtlogEntries = new DSLogData.LogEntriesDataTable();
                 m_dvMainView = new DataViewEx(m_dtlogEntries);
                 lblMemory.Text = "Used Ram: " + ((double)Process.GetCurrentProcess().WorkingSet64 / 1000000d).ToString(".00") + " MB";
                 dataGridView1.AutoGenerateColumns = false;
+                cmbBehaviors.SelectedItem = LogBehavior.AutoDetectBehaviour;
             }
             catch (Exception ex)
             {
@@ -169,7 +175,12 @@ namespace LogViewer
             string d = row.IsLogLevelNull() ? null : row.LogLevel;
             string line = a + " " + b + " " + c + " " + d;
 
-            //if we have a line filter, use it.
+            return IsLineInFilter(strLogFile, line);
+        }
+
+        private bool IsLineInFilter(string strLogFile, string line)
+        {
+//if we have a line filter, use it.
             if (m_colLineFilter.ContainsKey(strLogFile))
             {
                 //check line with filter, and return null if it doesn't match
@@ -178,11 +189,12 @@ namespace LogViewer
                     return false;
             }
 
-            //if we have a global line filter use it..
+                //if we have a global line filter use it..
             else if (m_objGlobalLineFilter != null)
             {
                 //check line with filter, and return null if it doesn't match
-                if (m_objGlobalLineFilter != null && !m_objGlobalLineFilter.IsMatch(line.Replace('\n', ' ').Replace('\a', ' ').Replace('\r', ' ')))
+                if (m_objGlobalLineFilter != null &&
+                    !m_objGlobalLineFilter.IsMatch(line.Replace('\n', ' ').Replace('\a', ' ').Replace('\r', ' ')))
                     return false;
             }
 
@@ -214,13 +226,16 @@ namespace LogViewer
         /// </summary>
         /// <param name="p_strLogFileHead"></param>
         /// <returns></returns>
-        LogBehavior FindCorrectBehaviorForFile(string p_strLogFileHead)
+        LogBehavior FindCorrectBehaviorForFileByHeader(string p_strLogFileHead)
         {
             List<LogBehavior> colGoodBehaviors = new List<LogBehavior>();
             LogBehavior defBhavior = null;
             //parse with each parser in turn - find parser with most matches
             foreach (LogBehavior lb in m_colBehaviors)
             {
+                if (lb == LogBehavior.AutoDetectBehaviour)
+                    continue;
+
                 //don't check the default, cause it'll win every time!
                 if (lb.BehaviorName == "Default")
                 {
@@ -262,7 +277,7 @@ namespace LogViewer
         /// <param name="p_strLogFileName"></param>
         /// <param name="p_intStartPos"></param>
         /// <returns></returns>
-        public long ParseLogFileRegExp(string p_strLogFileName, long p_intStartPos)
+        public long ParseLogFileRegExp(string p_strLogFileName, long p_intStartPos, LogBehavior behaviorForCurrentFile)
         {
             m_dtlogEntries.BeginLoadData();
             long lngFileTotalBytes = 0;
@@ -279,9 +294,21 @@ namespace LogViewer
                         string strAllText = objReader.ReadToEnd();
                         lngFileTotalBytes = strAllText.Length;
                         //m_drPrevRow = drRow;
-                        MatchCollection colMatches = m_objChosenBehavior.ParserRegex.Matches(strAllText);
+                        MatchCollection colMatches = behaviorForCurrentFile.ParserRegex.Matches(strAllText);
+
+
+
                         foreach (Match match in colMatches)
                         {
+                            int increment = (int)((double)lngFileTotalBytes / (double)colMatches.Count);
+                            progressbytes += increment;
+                            ProgressBarManager.IncrementProgress(increment);
+
+                            if (!IsLineInFilter(p_strLogFileName, match.Value))
+                            {
+                                continue;
+                            }
+
                             DSLogData.LogEntriesRow drRow = m_objDummyTable.NewLogEntriesRow();
                             string strDate = match.Groups["date"].Value;
                             string strThread = match.Groups["thread"].Value;
@@ -296,10 +323,16 @@ namespace LogViewer
                             drRow.ErrorInfo = strInfoEx;
                             //"14/11 16:39:03,236"
                             DateTime dtmTemp = DateTime.Now;
-                            bool ok = System.DateTime.TryParseExact(strDate, m_objChosenBehavior.DateFormat, Application.CurrentCulture, System.Globalization.DateTimeStyles.None, out dtmTemp);
+                            bool ok = System.DateTime.TryParseExact(strDate, behaviorForCurrentFile.DateFormat, Application.CurrentCulture, System.Globalization.DateTimeStyles.None, out dtmTemp);
 
                             if (!ok)
-                                drRow.EntryTime = DateTime.Now;
+                                ok = System.DateTime.TryParseExact(strDate + "0", behaviorForCurrentFile.DateFormat, Application.CurrentCulture, System.Globalization.DateTimeStyles.None, out dtmTemp);
+
+                            if (!ok)
+                                ok = System.DateTime.TryParseExact(strDate + "00", behaviorForCurrentFile.DateFormat, Application.CurrentCulture, System.Globalization.DateTimeStyles.None, out dtmTemp);
+
+                            if (!ok)
+                                drRow.EntryTime = DateTime.MinValue;
                             else
                                 drRow.EntryTime = dtmTemp;
 
@@ -334,15 +367,13 @@ namespace LogViewer
                             //m_dtlogEntries.AddLogEntriesRow(drRow);
 
 
-                            if (IsLineInFilter(p_strLogFileName, drRow))
-                            {
+                            //if (IsLineInFilter(p_strLogFileName, match.Value))
+                            //{
                                 drRow.Key = m_intLineCount;
                                 ++m_intLineCount;
                                 ImportRowToTable(drRow, m_dtlogEntries);
-                            }
-                            int increment = (int)((double)lngFileTotalBytes / (double)colMatches.Count);
-                            progressbytes += increment;
-                            ProgressBarManager.IncrementProgress(increment);
+                            //}
+                     
                         }
 
                         ProgressBarManager.IncrementProgress(lngFileTotalBytes - progressbytes);
@@ -444,10 +475,16 @@ namespace LogViewer
             lblMemory.Text = "Used Ram: " + ((double)Process.GetCurrentProcess().WorkingSet64 / 1000000d).ToString(".00") + " MB";
         }
 
+        private bool IsAutoDetectMode
+        {
+            get { return (m_objChosenBehavior == LogBehavior.AutoDetectBehaviour); }
+        }
+
         public bool AddFile(string file)
         {
             if (file.Trim() == "")
                 return true;
+            LogBehavior behaviorForCurrentFile = m_objChosenBehavior;
 
             bool blnLiveListen = false;
             string strLiveListen = ConfigurationManager.AppSettings["LiveListeningOnByDefault"];
@@ -472,32 +509,11 @@ namespace LogViewer
             if (!m_colWatchedFiles.ContainsKey(file))
             {
 
-                //if this is the firs file - we need to select a behavior for parsing the logs and formatting gridCols
-                int intNumLines = 50;
-                string linesForDetection = ConfigurationManager.AppSettings["NumLogLinesForAutoDetect"];
-                if (linesForDetection == null || !int.TryParse(linesForDetection, out intNumLines))
-                    intNumLines = 50;
+                behaviorForCurrentFile = FindCorrectBehaviorForFile(file);
 
-                if (m_objChosenBehavior == null)
+                if (m_objChosenBehavior != null && !IsAutoDetectMode)
                 {
-                    StringBuilder sbHeader = new StringBuilder();
-                    FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                    using (StreamReader sr = new StreamReader(fs))
-                    {
-                        //get the first lines of the file
-                        for (int i = 0; i < intNumLines; i++)
-                        {
-                            string line = sr.ReadLine();
-                            if (line == null)
-                                break;
-
-                            sbHeader.AppendLine(line);
-                        }
-                    }
-                    fs.Close();
-                    fs.Dispose();
-                    //check the first lines of the file to find out which type of log it is
-                    m_objChosenBehavior = FindCorrectBehaviorForFile(sbHeader.ToString());
+                    m_objChosenBehavior = behaviorForCurrentFile;
                     cmbBehaviors.SelectedItem = m_objChosenBehavior;
 
                     if (m_objChosenBehavior != null)
@@ -521,16 +537,15 @@ namespace LogViewer
 
                     }
                 }
-
                 //if there was no chosen behavior, return false
-                if (m_objChosenBehavior == null)
+                if (behaviorForCurrentFile == null)
                 {
                     OpenNotepad(file);
                     return false;
                 }
                 int intCountBefore = dataGridView1.Rows.Count;
                 //parse the log file (using the chosen behaviour's regexp)
-                long readBytes = ParseLogFileRegExp(file, 0);
+                long readBytes = ParseLogFileRegExp(file, 0, behaviorForCurrentFile);
 
                 ////if no bytes were read, or an error occured, return false
                 //if (readBytes == long.MinValue || readBytes == 0)
@@ -555,6 +570,47 @@ namespace LogViewer
 
             //success
             return true;
+        }
+
+        private LogBehavior FindCorrectBehaviorForFile(string file)
+        {
+            if (m_behaviorsForFiles.ContainsKey(file))
+            {
+                return m_behaviorsForFiles[file];
+            }
+
+            LogBehavior behaviorForCurrentFile = null;
+
+            //if this is the firs file - we need to select a behavior for parsing the logs and formatting gridCols
+            int intNumLines = 50;
+            string linesForDetection = ConfigurationManager.AppSettings["NumLogLinesForAutoDetect"];
+            if (linesForDetection == null || !int.TryParse(linesForDetection, out intNumLines))
+                intNumLines = 50;
+
+            if (m_objChosenBehavior == null || IsAutoDetectMode)
+            {
+                StringBuilder sbHeader = new StringBuilder();
+                FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    //get the first lines of the file
+                    for (int i = 0; i < intNumLines; i++)
+                    {
+                        string line = sr.ReadLine();
+                        if (line == null)
+                            break;
+
+                        sbHeader.AppendLine(line);
+                    }
+                }
+                fs.Close();
+                fs.Dispose();
+                //check the first lines of the file to find out which type of log it is
+                behaviorForCurrentFile = FindCorrectBehaviorForFileByHeader(sbHeader.ToString());
+
+                m_behaviorsForFiles[file] = behaviorForCurrentFile;
+            }
+            return behaviorForCurrentFile;
         }
 
         private void OpenNotepad(string p_strLogFileName)
@@ -644,7 +700,7 @@ namespace LogViewer
             {
                 AddFile(file);
             }
-            
+
             ProgressBarManager.CloseProgress();
             if (m_colWatchedFiles.Count == 0) Application.Exit();
         }
@@ -736,7 +792,7 @@ namespace LogViewer
                         intTotalDirLogBytes += (new FileInfo(logFile)).Length;
                     }
                 }
-                
+
                 ProgressBarManager.FullProgressBarValue = intTotalDirLogBytes;
                 ProgressBarManager.SetLableText("loading: " + dir);
                 colFilesForCollection.ForEach(f => AddFile(f));
@@ -791,9 +847,15 @@ namespace LogViewer
                     {
                         foreach (DataGridViewColumn col in dataGridView1.Columns)
                         {
-                            string val = row.Cells[col.Name].Value.ToString();
+                            object val = row.Cells[col.Name].Value;
+                            string strVal = val.ToString();
+                            if (val is DateTime)
+                            {
+                                strVal = ((DateTime)val).ToString(DATE_TIME_FORMAT);
+                            }
+                            
                             //use quotes to wrap all lines (escaping the spaces and \n \r chars), and replace " with ""
-                            wr.Write("\"" + val.Replace("\"", "\"\"") + "\",");
+                            wr.Write("\"" + strVal.Trim("\n\r\t ".ToCharArray()).Replace("\"", "\"\"") + "\",");
                         }
                         wr.WriteLine();
                     }
@@ -850,17 +912,24 @@ namespace LogViewer
             }
         }
 
-#region eventHandlers
+        #region eventHandlers
 
         private void loadServerListToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (m_frmBatchCollector.ShowDialog() == DialogResult.OK)
             {
+                if (!string.IsNullOrEmpty(m_frmBatchCollector.BehaviorName))
+                {
+                    var beh = m_colBehaviors.Where(b => b.BehaviorName.Equals(m_frmBatchCollector.BehaviorName, StringComparison.CurrentCultureIgnoreCase)).FirstOrDefault();
+                    if (beh != null)
+                        m_objChosenBehavior = beh;
+                }
 
                 if (m_frmBatchCollector.LogDirectories.Count == 0)
                 {
                     m_objGlobalLineFilter = m_frmBatchCollector.CardsLineFilter;
                 }
+
                 ProgressBarManager.ShowProgressBar(100);
                 foreach (string directory in m_frmBatchCollector.LogDirectories)
                     ProcessLogDirectory(m_frmBatchCollector.ExcludeList, m_frmBatchCollector.IncludeList, m_frmBatchCollector.CardsLineFilter, m_frmBatchCollector.History, directory);
@@ -968,12 +1037,32 @@ namespace LogViewer
             m_intLineCount = 1;
             m_objChosenBehavior.CreateGridCols(dataGridView1);
 
-            foreach (string file in m_colWatchedFiles.Keys)
+            LogBehavior behavior = m_objChosenBehavior;
+
+            foreach (string file in m_colWatchedFiles.Keys.ToList())
             {
-                ParseLogFileRegExp(file, 0);
+                if (IsAutoDetectMode)
+                {
+                    behavior = FindCorrectBehaviorForFile(file);
+                }
+
+                ParseLogFileRegExp(file, 0, behavior);
             }
 
         }
+
+        //private LogBehavior GetBehaviorForFile(string file)
+        //{
+        //    if (m_behaviorsForFiles.ContainsKey(file))
+        //    {
+        //        return m_behaviorsForFiles[file];
+        //    }
+        //    else
+        //    {
+
+        //    }
+        //    return null;
+        //}
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -1221,7 +1310,11 @@ namespace LogViewer
                     //file changed (more entries were added)
                     if (lngPrevLength < lngFileLength)
                     {
-                        long lngNewLength = ParseLogFileRegExp(file, lngPrevLength);
+                        LogBehavior behavior = m_objChosenBehavior;
+                        if (IsAutoDetectMode)
+                            behavior = m_behaviorsForFiles[file];
+
+                        long lngNewLength = ParseLogFileRegExp(file, lngPrevLength, behavior);
                         m_colWatchedFiles[file] = lngNewLength;
 
                         if (!chkPinTrack.Checked && dataGridView1.Rows.Count > 0)
@@ -1251,7 +1344,7 @@ namespace LogViewer
             ShowLineCard(intRowIndex);
 
         }
-#endregion
+        #endregion
 
     }
 }

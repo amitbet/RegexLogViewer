@@ -39,24 +39,6 @@
     <BehaviorName>VisualStudio</BehaviorName>
   </LogBehavior>
   <LogBehavior>
-    <BehaviorName>STLog4Net</BehaviorName>
-    <Grade>0</Grade>
-    <!--C# date format: http://msdn.microsoft.com/en-us/library/8kb3ddd4.aspx-->
-    <DateFormat>yyyy-MM-dd HH:mm:ss,fff</DateFormat>
-    <!--use: <date>,<thread>,<level>,<info>,<exinfo> as named groups in regex, this will identify the log line parts
-    
-        date = the date, which should be in the date format stated in the <DateFormat> tag.
-        info = the info usually represented inside the log line\
-        exinfo = the exception lines that follow, or other extended information (one or more lines)
-        level = the log level.
-        thread = the name/number of the thread
-    -->
-    <ParserRegexPatternCData><![CDATA[
-    ^(?<date>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2},\d{3})\s[\w.\s]*\[\s*(?<thread>[\w\d]*)\]\s*(?<level>\w*)\s*[-\s]*(?<info>.*?)\n(?<exinfo>.*?)(?=\d{4}-\d{2}|\z)
-    ]]></ParserRegexPatternCData>
-    <ParserRegexOptionsString>IgnoreCase Multiline Compiled Singleline</ParserRegexOptionsString>
-  </LogBehavior>
-  <LogBehavior>
     <BehaviorName>Log4Net</BehaviorName>
     <Grade>0</Grade>
     <!--C# date format: http://msdn.microsoft.com/en-us/library/8kb3ddd4.aspx-->
@@ -73,6 +55,47 @@
       <![CDATA[
       (?<date>\d{2}/\d{2} \d{2}:\d{2}:\d{2},\d{3})\s[\w.\s]*\[\s*(?<thread>[\w\d]*)\]\s*(?<level>\w{4,8})\s{1,5}[-\s]*\|\|\s{1,4}(?<user>.{1,20}?)\s{1,4}\|\|\s{1,4}(?<machine>.{1,20}?)\s{1,4}\|\|\s{0,4}(?<info>.*?)\n(?<exinfo>.*?)(?=\d{2}/\d{2}|\z)
     ]]></ParserRegexPatternCData>
+    <ParserRegexOptionsString>ignoreCase,Multiline,Compiled,Singleline</ParserRegexOptionsString>
+  </LogBehavior>
+  <LogBehavior>
+    <BehaviorName>UFTLog</BehaviorName>
+    <Grade>0</Grade>
+    <!--C# date format: http://msdn.microsoft.com/en-us/library/8kb3ddd4.aspx-->
+    <DateFormat>yyyy-MM-dd HH:mm:ss,fff</DateFormat>
+    <!--use: <date>,<thread>,<level>,<info>,<exinfo> as named groups in regex, this will identify the log line parts
+    
+        date = the date, which should be in the date format stated in the <DateFormat> tag.
+        info = the info usually represented inside the log line\
+        exinfo = the exception lines that follow, or other extended information (one or more lines)
+        level = the log level.
+        thread = the name/number of the thread
+    -->
+    <ParserRegexPatternCData>
+      <![CDATA[
+      (?<date>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2},\d{1,3})\s+(?<info>[\w\.]+)\s+\[\s+(?<thread>\d*)\]\s+(?<level>INFO|DEBUG|ERROR|FATAL|WARN)\s+(?<exinfo>.*?)(?=\d{4}-\d{2}|\z)
+    ]]>
+    </ParserRegexPatternCData>
+    <ParserRegexOptionsString>ignoreCase,Multiline,Compiled,Singleline</ParserRegexOptionsString>
+  </LogBehavior>
+  <LogBehavior>
+    <BehaviorName>BPTLog</BehaviorName>
+    <Grade>0</Grade>
+    <!--C# date format: http://msdn.microsoft.com/en-us/library/8kb3ddd4.aspx-->
+
+    <DateFormat>M/d/yyyy h:mm:ss tt:fff</DateFormat>
+    <!--use: <date>,<thread>,<level>,<info>,<exinfo> as named groups in regex, this will identify the log line parts
+    
+        date = the date, which should be in the date format stated in the <DateFormat> tag.
+        info = the info usually represented inside the log line\
+        exinfo = the exception lines that follow, or other extended information (one or more lines)
+        level = the log level.
+        thread = the name/number of the thread
+    -->
+    <ParserRegexPatternCData>
+      <![CDATA[
+      \[(?<level>INFO|DEBUG|ERROR|FATAL|WARN)\]\s+\[Thr=(?<thread>\d*)\]\s+\[(?<date>\d+/\d+/\d+\s+\d+:\d+:\d+ (PM|AM):\d+)](?<info>.*?)(?=\[(INFO|DEBUG|ERROR|FATAL|WARN)|\z)
+    ]]>
+    </ParserRegexPatternCData>
     <ParserRegexOptionsString>ignoreCase,Multiline,Compiled,Singleline</ParserRegexOptionsString>
   </LogBehavior>
 </ArrayOfLogBehavior>

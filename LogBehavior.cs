@@ -16,6 +16,30 @@ namespace LogViewer
         Dictionary<string, LogGridColDefinition> m_colDefaultColumns = new Dictionary<string, LogGridColDefinition>();
 
         //public static string DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss,fff";
+        private static LogBehavior _autoDetectBehaviour;
+        public static LogBehavior AutoDetectBehaviour
+        {
+            get
+            {
+                if (_autoDetectBehaviour == null)
+                    _autoDetectBehaviour = CreateAutoBehaviour();
+                return _autoDetectBehaviour;
+            }
+        }
+
+        private static LogBehavior CreateAutoBehaviour()
+        {
+            LogBehavior b = new LogBehavior();
+            //b.GridCols.Add("key");
+            b.GridCols.Add("date");
+            b.GridCols.Add("level");
+            b.GridCols.Add("info");
+            b.GridCols.Add("exinfo");
+            b.GridCols.Add("thread");
+//            b.GridCols.Add("sourcefile");
+            b.BehaviorName = "AutoDetect";
+            return b;
+        }
 
         public LogBehavior()
         {

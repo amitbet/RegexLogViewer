@@ -33,6 +33,8 @@ namespace LogViewer
 
         private void PopulatePresetsCombo()
         {
+            cmbExistingPresets.Items.Clear();
+            
             if (Directory.Exists(m_strPresetsDir))
             {
                 Directory.GetFiles(m_strPresetsDir, "*.lgs").ToList().ForEach(p => cmbExistingPresets.Items.Add(Path.GetFileName(p).Substring(0, Path.GetFileName(p).Length - 4)));
@@ -81,6 +83,8 @@ namespace LogViewer
             set { m_intHistory = value; }
         }
 
+        public string BehaviorName { get; set; }
+
         string m_strPresetsDir = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Presets");
 
         public const int NUM_LATEST_FILES_TO_COLLECT = 1;
@@ -107,7 +111,7 @@ namespace LogViewer
             get { return m_colLogDirectories; }
             set { m_colLogDirectories = value; }
         }
-        WildCards m_cardsLineFilter = null;
+        WildCards m_cardsLineFilter = new WildCards();
 
         public WildCards CardsLineFilter
         {
@@ -179,6 +183,13 @@ namespace LogViewer
                         continue;
                     }
 
+                    if (line.Trim().ToLower().StartsWith("behavior:", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        string bName = line.Trim().Substring(9).Trim();
+                        BehaviorName = bName;
+                        continue;
+                    }
+
                     //get wildcards for line filtering
                     if (line.Trim().ToLower().StartsWith("linefilter:"))
                     {
@@ -186,7 +197,8 @@ namespace LogViewer
                         if (!string.IsNullOrEmpty(includes))
                         {
                             txtLineContains.Text = includes;
-                            m_cardsLineFilter = new WildCards("*" + includes.Trim() + "*");
+                            //m_cardsLineFilter = new WildCards("*" + includes.Trim() + "*");
+                            m_cardsLineFilter.AddWildCard("*" + includes.Trim() + "*");
                         }
                         continue;
                     }

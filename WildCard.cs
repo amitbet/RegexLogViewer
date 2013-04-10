@@ -65,6 +65,10 @@ namespace LogViewer
 
     public class WildCards
     {
+        public WildCards()
+        {
+        }
+
         public WildCards(string p_strFilters)
         {
             string strFilters = p_strFilters.Trim(" ,;".ToCharArray());
@@ -74,6 +78,11 @@ namespace LogViewer
             string[] filters = strFilters.Split(";,".ToCharArray());
             foreach (string filter in filters)
                 m_colWildCards.Add(new Wildcard(filter));
+        }
+
+        public void AddWildCard(string str)
+        {
+            m_colWildCards.Add(new Wildcard(str));
         }
 
         List<Wildcard> m_colWildCards = new List<Wildcard>();
