@@ -26,7 +26,7 @@ namespace LogViewer
         Regex m_regVSParsingReg = new Regex(@"(?:(?<exinfo>(?<file>[\w\d\s\.]*)\((?<line>\d{1,5}),(?<column>\d{1,5})\)):\s(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])|(?:(?<level>info|warning|error)\s.*?:\s(?<info>.*?)[\n\r])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         LogBehavior m_objChosenBehavior = null;
         public static string DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss,fff";
-
+        private TimeBuffer m_refreshFilterTimeBuff = null;
         //private DSLogData m_dsTables = new DSLogData();
         private DSLogData.LogEntriesDataTable m_dtlogEntries;
         private EntryCard m_frmCard = new EntryCard();
@@ -86,6 +86,7 @@ namespace LogViewer
 
         public MainForm()
         {
+            m_refreshFilterTimeBuff = new TimeBuffer(RefreshFilter, TimeSpan.FromMilliseconds(500));
             string strDateTimeFormat = ConfigurationManager.AppSettings["GridDateTimeFormat"];
             if (strDateTimeFormat != null)
                 DATE_TIME_FORMAT = strDateTimeFormat;
@@ -1174,15 +1175,18 @@ namespace LogViewer
 
         }
 
+        
         private void txtFilter_TextChanged(object sender, EventArgs e)
         {
+            
             if (txtFilter.Text.Trim() == "")
                 m_strTextFilter = "";
             else
             {
                 m_strTextFilter = "ErrorInfo Like '%" + txtFilter.Text.Replace("'", "''") + "%' OR Info Like '%" + txtFilter.Text.Replace("'", "''") + "%'";
             }
-            RefreshFilter();
+            m_refreshFilterTimeBuff.Restart();
+            //RefreshFilter();
         }
 
         private void dtpFrom_ValueChanged(object sender, EventArgs e)
@@ -1214,7 +1218,7 @@ namespace LogViewer
             {
                 m_strUserFilter = "UserName Like '%" + txtUser.Text.Replace("'", "''") + "%'";
             }
-            RefreshFilter();
+            m_refreshFilterTimeBuff.Restart();
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -1334,7 +1338,7 @@ namespace LogViewer
             {
                 m_strThreadFilter = "ThreadName Like '%" + txtThread.Text.Replace("'", "''") + "%'";
             }
-            RefreshFilter();
+            m_refreshFilterTimeBuff.Restart();
         }
 
         private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)

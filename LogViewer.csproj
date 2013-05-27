@@ -173,6 +173,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="RowPrototype.cs" />
+    <Compile Include="TimeBuffer.cs" />
     <Compile Include="WildCard.cs" />
   </ItemGroup>
   <ItemGroup>
