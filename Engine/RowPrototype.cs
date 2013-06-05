@@ -7,7 +7,7 @@ namespace LogViewer
 {
     class RowPrototype
     {
-        public DSLogData.LogEntriesRow MyDataRow = null;
+        public LogEntry MyDataRow = null;
         public int MyCount = 1;
         string m_strOrigString = null;
         string m_strIdString = null;
@@ -21,7 +21,7 @@ namespace LogViewer
             }
         }
 
-        public RowPrototype(DSLogData.LogEntriesRow p_row)
+        public RowPrototype(LogEntry p_row)
         {
             MyIdString = (p_row.Info + p_row.ErrorInfo);
             m_strOrigString = (p_row.Info + p_row.ErrorInfo);
@@ -29,7 +29,7 @@ namespace LogViewer
             m_colTrigrams = GetStringTrigrams(m_strIdString);
         }
 
-        HashSet<char> m_colAllowedChars = new HashSet<char>("פםןוטארקףךלחיעכגדשץתצמנהבסזqwertyuiop[]\\asdfghjklzxcvbnm/".ToCharArray());
+        HashSet<char> m_colAllowedChars = new HashSet<char>("פםןוטארקףךלחיעכגדשץתצמנהבסזqwertyuiop[]\\asdfghjklzxcvbnmABCDEFGHIJKLMNOPQRSTUVWXYZ/".ToCharArray());
         private string ReviseString(string p_str)
         {
             string str = p_str.ToLower();

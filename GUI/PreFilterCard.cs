@@ -34,7 +34,7 @@ namespace LogViewer
         private void PopulatePresetsCombo()
         {
             cmbExistingPresets.Items.Clear();
-            
+
             if (Directory.Exists(m_strPresetsDir))
             {
                 Directory.GetFiles(m_strPresetsDir, "*.lgs").ToList().ForEach(p => cmbExistingPresets.Items.Add(Path.GetFileName(p).Substring(0, Path.GetFileName(p).Length - 4)));
@@ -225,12 +225,14 @@ namespace LogViewer
 
         private void txtFileContains_TextChanged(object sender, EventArgs e)
         {
-            txtFileContains.Text.Split(";,".ToCharArray()).ToList().ForEach(p => m_colIncludeList.Add(p));
+            m_colIncludeList.Clear();
+            txtFileContains.Text.Split(";,".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(p => m_colIncludeList.Add(p));
         }
 
         private void txtFileExclude_TextChanged(object sender, EventArgs e)
         {
-            txtFileExclude.Text.Split(";,".ToCharArray()).ToList().ForEach(p => m_colExcludeList.Add(p));
+            m_colExcludeList.Clear();
+            txtFileExclude.Text.Split(";,".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList().ForEach(p => m_colExcludeList.Add(p));
         }
 
         private void txtLineContains_TextChanged(object sender, EventArgs e)

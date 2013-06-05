@@ -16,20 +16,21 @@ namespace LogViewer
 
     public class TimeBuffer
     {
-        private Action _action = null;
+        private Action<object> _action = null;
         private DateTime _when = DateTime.Now;
         private TimeBuffStatus _state = TimeBuffStatus.Off;
         private Exception _problem = null;
         Thread _runnerThread = null;
         private TimeSpan _initialTimeBuffer = TimeSpan.FromSeconds(1);
         SynchronizationContext _origSyncContext = null;
+        public object ContentObject { get; set; }
 
-        public TimeBuffer(Action act)
+        public TimeBuffer(Action<object> act)
             : this(act, TimeSpan.FromSeconds(1))
         {
         }
 
-        public TimeBuffer(Action act, TimeSpan timeBuffer)
+        public TimeBuffer(Action<object> act, TimeSpan timeBuffer)
         {
             _initialTimeBuffer = timeBuffer;
             _action = act;
@@ -51,7 +52,7 @@ namespace LogViewer
                         {
                             try
                             {
-                                _origSyncContext.Send((SendOrPostCallback) delegate { _action.Invoke(); }, null);
+                                _origSyncContext.Send((SendOrPostCallback)delegate { _action.Invoke(ContentObject); }, null);
 
                                 _state = TimeBuffStatus.Done;
                                 break;

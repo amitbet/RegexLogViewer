@@ -35,7 +35,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ApplicationIcon>eye1.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\eye1.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -73,69 +73,75 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataViewEx.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="DefaultLogBehavior.cs" />
-    <Compile Include="DSLogData.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DSLogData.xsd</DependentUpon>
-    </Compile>
-    <Compile Include="FrmProgressBar.cs">
+    <Compile Include="Engine\DefaultLogBehavior.cs" />
+    <Compile Include="Engine\IPropertyRetriever.cs" />
+    <Compile Include="Engine\LogEngine.cs" />
+    <Compile Include="Engine\ReportGenMethod.cs" />
+    <Compile Include="GUI\FrmFind.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FrmProgressBar.Designer.cs">
+    <Compile Include="GUI\FrmFind.Designer.cs">
+      <DependentUpon>FrmFind.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\FrmProgressBar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\FrmProgressBar.Designer.cs">
       <DependentUpon>FrmProgressBar.cs</DependentUpon>
     </Compile>
-    <Compile Include="FRMVanishingAlert.cs">
+    <Compile Include="GUI\FRMVanishingAlert.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FRMVanishingAlert.designer.cs">
+    <Compile Include="GUI\FRMVanishingAlert.designer.cs">
       <DependentUpon>FRMVanishingAlert.cs</DependentUpon>
     </Compile>
-    <Compile Include="LogBehavior.cs" />
-    <Compile Include="LogColumnType.cs" />
-    <Compile Include="LogGridColDefinition.cs" />
-    <Compile Include="MainForm.cs">
+    <Compile Include="Engine\LogBehavior.cs" />
+    <Compile Include="Engine\LogEntry.cs" />
+    <Compile Include="Engine\LogGridColDefinition.cs" />
+    <Compile Include="Engine\LogFilter.cs" />
+    <Compile Include="GUI\LogSearch.cs" />
+    <Compile Include="GUI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="GUI\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="EntryCard.cs">
+    <Compile Include="GUI\EntryCard.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EntryCard.Designer.cs">
+    <Compile Include="GUI\EntryCard.Designer.cs">
       <DependentUpon>EntryCard.cs</DependentUpon>
     </Compile>
-    <Compile Include="OpenFolderDialog.cs" />
-    <Compile Include="PreFilterCard.cs">
+    <Compile Include="GUI\OpenFolderDialog.cs" />
+    <Compile Include="GUI\PreFilterCard.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PreFilterCard.Designer.cs">
+    <Compile Include="GUI\PreFilterCard.Designer.cs">
       <DependentUpon>PreFilterCard.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
-    <Compile Include="ProgressBar.cs" />
+    <Compile Include="GUI\ProgressBar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FrmProgressBar.resx">
+    <EmbeddedResource Include="GUI\FrmFind.resx">
+      <DependentUpon>FrmFind.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\FrmProgressBar.resx">
       <DependentUpon>FrmProgressBar.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="FRMVanishingAlert.resx">
+    <EmbeddedResource Include="GUI\FRMVanishingAlert.resx">
       <SubType>Designer</SubType>
       <DependentUpon>FRMVanishingAlert.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="GUI\MainForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="EntryCard.resx">
+    <EmbeddedResource Include="GUI\EntryCard.resx">
       <SubType>Designer</SubType>
       <DependentUpon>EntryCard.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PreFilterCard.resx">
+    <EmbeddedResource Include="GUI\PreFilterCard.resx">
       <DependentUpon>PreFilterCard.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -152,17 +158,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="DSLogData.xsc">
-      <DependentUpon>DSLogData.xsd</DependentUpon>
-    </None>
-    <None Include="DSLogData.xsd">
-      <SubType>Designer</SubType>
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>DSLogData.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="DSLogData.xss">
-      <DependentUpon>DSLogData.xsd</DependentUpon>
-    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -172,9 +167,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="RowPrototype.cs" />
-    <Compile Include="TimeBuffer.cs" />
-    <Compile Include="WildCard.cs" />
+    <Compile Include="Engine\RowPrototype.cs" />
+    <Compile Include="GUI\SortableBindingList.cs" />
+    <Compile Include="GUI\TimeBuffer.cs" />
+    <Compile Include="Engine\WildCard.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -207,8 +203,8 @@
     <Content Include="BehaviorConfig.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="eye1.ico" />
-    <Content Include="Untitled - 1.ico" />
+    <Content Include="Resources\eye1.ico" />
+    <Content Include="Resources\Untitled - 1.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

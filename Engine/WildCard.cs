@@ -87,6 +87,11 @@ namespace LogViewer
 
         List<Wildcard> m_colWildCards = new List<Wildcard>();
 
+        public int Count
+        {
+            get { return m_colWildCards.Count; }
+        }
+
         /// <summary>
         /// returns true if there's a match with one filter at least
         /// </summary>
@@ -98,7 +103,7 @@ namespace LogViewer
 
             foreach (Wildcard filter in m_colWildCards)
             {
-                
+
                 if (filter.IsMatch(strAnyString))
                     return true;
             }

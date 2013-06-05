@@ -39,11 +39,6 @@ namespace LogViewer
             this.Level = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Info = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ExInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.logEntriesBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.dSLogDataBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.dSLogData = new LogViewer.DSLogData();
-            this.logEntriesBindingSource1 = new System.Windows.Forms.BindingSource(this.components);
-            this.dSLogDataBindingSource1 = new System.Windows.Forms.BindingSource(this.components);
             this.cmbLevel = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
@@ -72,7 +67,6 @@ namespace LogViewer
             this.generateCvsReport3GramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.associateWithlogFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.clearAllFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearEntriesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopLiveListeningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startLiveListeningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -82,11 +76,6 @@ namespace LogViewer
             this.lblCount = new System.Windows.Forms.Label();
             this.lblMemory = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.logEntriesBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogData)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.logEntriesBindingSource1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource1)).BeginInit();
             this.cmsFiles.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -124,7 +113,7 @@ namespace LogViewer
             this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dataGridView1.Location = new System.Drawing.Point(17, 113);
-            this.dataGridView1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dataGridView1.Margin = new System.Windows.Forms.Padding(4);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
@@ -141,11 +130,12 @@ namespace LogViewer
             this.dataGridView1.Size = new System.Drawing.Size(876, 406);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
-            this.dataGridView1.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellContentClick);
             this.dataGridView1.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellDoubleClick);
+            this.dataGridView1.Sorted += new System.EventHandler(this.dataGridView1_Sorted);
             this.dataGridView1.DragDrop += new System.Windows.Forms.DragEventHandler(this.dataGridView1_DragDrop);
             this.dataGridView1.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridView1_DragEnter);
             this.dataGridView1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.dataGridView1_KeyPress);
+            this.dataGridView1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyUp);
             // 
             // EntryNumber
             // 
@@ -175,31 +165,6 @@ namespace LogViewer
             this.ExInfo.Name = "ExInfo";
             this.ExInfo.ReadOnly = true;
             // 
-            // logEntriesBindingSource
-            // 
-            this.logEntriesBindingSource.DataMember = "LogEntries";
-            this.logEntriesBindingSource.DataSource = this.dSLogDataBindingSource;
-            // 
-            // dSLogDataBindingSource
-            // 
-            this.dSLogDataBindingSource.DataSource = this.dSLogData;
-            this.dSLogDataBindingSource.Position = 0;
-            // 
-            // dSLogData
-            // 
-            this.dSLogData.DataSetName = "DSLogData";
-            this.dSLogData.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
-            // logEntriesBindingSource1
-            // 
-            this.logEntriesBindingSource1.DataMember = "LogEntries";
-            this.logEntriesBindingSource1.DataSource = this.dSLogDataBindingSource1;
-            // 
-            // dSLogDataBindingSource1
-            // 
-            this.dSLogDataBindingSource1.DataSource = this.dSLogData;
-            this.dSLogDataBindingSource1.Position = 0;
-            // 
             // cmbLevel
             // 
             this.cmbLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -212,7 +177,7 @@ namespace LogViewer
             "INFO",
             "DEBUG"});
             this.cmbLevel.Location = new System.Drawing.Point(69, 37);
-            this.cmbLevel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.cmbLevel.Margin = new System.Windows.Forms.Padding(4);
             this.cmbLevel.Name = "cmbLevel";
             this.cmbLevel.Size = new System.Drawing.Size(160, 24);
             this.cmbLevel.TabIndex = 5;
@@ -251,7 +216,7 @@ namespace LogViewer
             // txtFilter
             // 
             this.txtFilter.Location = new System.Drawing.Point(343, 37);
-            this.txtFilter.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtFilter.Margin = new System.Windows.Forms.Padding(4);
             this.txtFilter.Name = "txtFilter";
             this.txtFilter.Size = new System.Drawing.Size(143, 22);
             this.txtFilter.TabIndex = 10;
@@ -272,7 +237,7 @@ namespace LogViewer
             this.dtpFrom.CustomFormat = "dd/MM/yyyy HH:mm:ss";
             this.dtpFrom.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpFrom.Location = new System.Drawing.Point(71, 70);
-            this.dtpFrom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dtpFrom.Margin = new System.Windows.Forms.Padding(4);
             this.dtpFrom.Name = "dtpFrom";
             this.dtpFrom.Size = new System.Drawing.Size(176, 22);
             this.dtpFrom.TabIndex = 14;
@@ -283,7 +248,7 @@ namespace LogViewer
             this.dtpTo.CustomFormat = "dd/MM/yyyy HH:mm:ss";
             this.dtpTo.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpTo.Location = new System.Drawing.Point(311, 70);
-            this.dtpTo.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dtpTo.Margin = new System.Windows.Forms.Padding(4);
             this.dtpTo.Name = "dtpTo";
             this.dtpTo.Size = new System.Drawing.Size(175, 22);
             this.dtpTo.TabIndex = 15;
@@ -302,7 +267,7 @@ namespace LogViewer
             // txtUser
             // 
             this.txtUser.Location = new System.Drawing.Point(549, 71);
-            this.txtUser.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtUser.Margin = new System.Windows.Forms.Padding(4);
             this.txtUser.Name = "txtUser";
             this.txtUser.Size = new System.Drawing.Size(121, 22);
             this.txtUser.TabIndex = 16;
@@ -322,7 +287,7 @@ namespace LogViewer
             this.lstFiles.FormattingEnabled = true;
             this.lstFiles.ItemHeight = 16;
             this.lstFiles.Location = new System.Drawing.Point(721, 37);
-            this.lstFiles.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.lstFiles.Margin = new System.Windows.Forms.Padding(4);
             this.lstFiles.Name = "lstFiles";
             this.lstFiles.Size = new System.Drawing.Size(171, 68);
             this.lstFiles.TabIndex = 19;
@@ -367,7 +332,7 @@ namespace LogViewer
             // txtThread
             // 
             this.txtThread.Location = new System.Drawing.Point(549, 37);
-            this.txtThread.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.txtThread.Margin = new System.Windows.Forms.Padding(4);
             this.txtThread.Name = "txtThread";
             this.txtThread.Size = new System.Drawing.Size(121, 22);
             this.txtThread.TabIndex = 21;
@@ -453,7 +418,6 @@ namespace LogViewer
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.associateWithlogFilesToolStripMenuItem,
-            this.clearAllFilesToolStripMenuItem,
             this.clearEntriesToolStripMenuItem,
             this.stopLiveListeningToolStripMenuItem,
             this.startLiveListeningToolStripMenuItem});
@@ -467,13 +431,6 @@ namespace LogViewer
             this.associateWithlogFilesToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
             this.associateWithlogFilesToolStripMenuItem.Text = "Associate with .log files";
             this.associateWithlogFilesToolStripMenuItem.Click += new System.EventHandler(this.associateWithlogFilesToolStripMenuItem_Click);
-            // 
-            // clearAllFilesToolStripMenuItem
-            // 
-            this.clearAllFilesToolStripMenuItem.Name = "clearAllFilesToolStripMenuItem";
-            this.clearAllFilesToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
-            this.clearAllFilesToolStripMenuItem.Text = "Remove All Files";
-            this.clearAllFilesToolStripMenuItem.Click += new System.EventHandler(this.clearAllFilesToolStripMenuItem_Click);
             // 
             // clearEntriesToolStripMenuItem
             // 
@@ -509,7 +466,7 @@ namespace LogViewer
             this.chkPinTrack.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkPinTrack.AutoSize = true;
             this.chkPinTrack.Location = new System.Drawing.Point(17, 527);
-            this.chkPinTrack.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.chkPinTrack.Margin = new System.Windows.Forms.Padding(4);
             this.chkPinTrack.Name = "chkPinTrack";
             this.chkPinTrack.Size = new System.Drawing.Size(201, 21);
             this.chkPinTrack.TabIndex = 24;
@@ -565,20 +522,14 @@ namespace LogViewer
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "MainForm";
             this.Text = "Regex LogViewer";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.MainForm_DragEnter);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.logEntriesBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogData)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.logEntriesBindingSource1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dSLogDataBindingSource1)).EndInit();
             this.cmsFiles.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -591,11 +542,7 @@ namespace LogViewer
 
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.BindingSource dSLogDataBindingSource;
-        private DSLogData dSLogData;
-        private System.Windows.Forms.BindingSource logEntriesBindingSource;
-        private System.Windows.Forms.BindingSource logEntriesBindingSource1;
-        private System.Windows.Forms.BindingSource dSLogDataBindingSource1;
+       
         private System.Windows.Forms.ComboBox cmbLevel;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
@@ -614,7 +561,6 @@ namespace LogViewer
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem associateWithlogFilesToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem clearAllFilesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem clearEntriesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem stopLiveListeningToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startLiveListeningToolStripMenuItem;

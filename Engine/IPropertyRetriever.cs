@@ -5,11 +5,8 @@ using System.Text;
 
 namespace LogViewer
 {
-    public enum LogColumnType
+    interface IPropertyRetriever
     {
-        String,
-        Int,
-        Date
+        object GetPropertyValue(string name);
     }
 }
-

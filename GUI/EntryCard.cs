@@ -15,9 +15,9 @@ namespace LogViewer
         {
             InitializeComponent();
         }
-        List<DSLogData.LogEntriesRow> m_ItemList = null;
+        List<LogEntry> m_ItemList = null;
         int m_position = 0;
-        public void Init(List<DSLogData.LogEntriesRow> list, int position)
+        public void Init(List<LogEntry> list, int position)
         {
             m_position = position;
             m_ItemList = list;
@@ -26,7 +26,7 @@ namespace LogViewer
 
         private void SetRowInForm()
         {
-            DSLogData.LogEntriesRow row = (DSLogData.LogEntriesRow)m_ItemList[m_position];
+            LogEntry row = (LogEntry)m_ItemList[m_position];
 
             
 
