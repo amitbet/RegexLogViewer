@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogViewer", "LogViewer.csproj", "{3214CAA3-5F42-4C3B-8525-436F745402E6}"
 EndProject
 Global

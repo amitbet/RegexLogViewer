@@ -483,6 +483,7 @@ namespace LogViewer
         private void cmbBehaviors_SelectedIndexChanged(object sender, EventArgs e)
         {
             LogBehavior b = (LogBehavior)cmbBehaviors.SelectedItem;
+            _engine.ChosenBehavior = b;
             dataGridView1.Columns.Clear();
             _engine.ChosenBehavior.CreateGridCols(dataGridView1);
             _engine.ReparseAllLogs(b);
