@@ -14,7 +14,7 @@
     -->
     <ParserRegexPatternCData>
       <![CDATA[
-      ^(?<info>.*)$
+      ^(?<info>.*)[\n\r]
       ]]>
     </ParserRegexPatternCData>
     <ParserRegexOptionsString>Multiline Compiled</ParserRegexOptionsString>

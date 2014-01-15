@@ -525,7 +525,7 @@ namespace LogViewer
             }
         }
 
-        
+
         public int FindPositionRow { get; set; }
         public string FindPrevSearchQuery { get; set; }
 
@@ -714,20 +714,23 @@ namespace LogViewer
         /// <param name="e"></param>
         private void timer1_Tick(object sender, EventArgs e)
         {
+            int startCount = _gridModel.Count;
             List<string> list = new List<string>();
             list.AddRange(_engine.WatchedFiles);
             List<LogEntry> filteredNewLines = new List<LogEntry>();
             foreach (string file in list)
             {
-                _engine.GetNewLinesForFile(file, CreateLogFilter());
-
+                filteredNewLines = _engine.GetNewLinesForFile(file, CreateLogFilter());
 
                 if (filteredNewLines.Count > 0 && !chkPinTrack.Checked && dataGridView1.Rows.Count > 0)
                     dataGridView1.FirstDisplayedCell = dataGridView1.Rows[0].Cells[0];
             }
 
             if (filteredNewLines.Count > 0)
+            //if (_gridModel.Count > startCount)
             {
+                //RefreshFilter();
+
                 _gridModel.ResetBindings();
                 _gridModel.ReSort();
                 MarkSelectedRowInGrid();
@@ -768,7 +771,7 @@ namespace LogViewer
         FrmFind _frmFinder = new FrmFind();
         private void dataGridView1_KeyUp(object sender, KeyEventArgs e)
         {
-            if(_frmFinder .IsDisposed)
+            if (_frmFinder.IsDisposed)
                 _frmFinder = new FrmFind();
 
             if (_frmFinder.Visible)
